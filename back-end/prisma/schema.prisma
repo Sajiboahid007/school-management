@@ -1,0 +1,336 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Roles
+model Role {
+  Id          String    @id @default(uuid())
+  Name        String    @unique
+  Description String?
+
+  Users       User[]
+  Teachers    Teacher[]
+  Students    Student[]
+
+  CreatedAt   DateTime  @default(now())
+  UpdatedAt   DateTime  @updatedAt
+}
+
+// 2. School Profile Information
+model SchoolInformation {
+  Id          String   @id @default(uuid())
+  Name        String
+  Code        String   @unique
+  Address     String
+  Phone       String
+  Email       String
+  Website     String?
+  LogoUrl     String?
+  CurrentYear String   @default("2026")
+
+  CreatedAt   DateTime @default(now())
+  UpdatedAt   DateTime @updatedAt
+}
+
+// 3. Departments / Streams
+model Department {
+  Id          String    @id @default(uuid())
+  Name        String    @unique
+  Code        String    @unique
+  Description String?
+
+  HeadId      String?   
+  HeadTeacher Teacher?  @relation("DepartmentHead", fields: [HeadId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  Teachers    Teacher[] @relation("TeacherDepartment")
+  Students    Student[] @relation("StudentDepartment")
+  Subjects    Subject[]
+
+  CreatedAt   DateTime  @default(now())
+  UpdatedAt   DateTime  @updatedAt
+}
+
+// 4. Base Users (Admins, Super Admins, Staff)
+model User {
+  Id               String         @id @default(uuid())
+  Name             String
+  Email            String         @unique
+  Password         String
+  Phone            String?
+
+  RoleId           String?
+  Role             Role?          @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  SentMessages     Message[]      @relation("SentUserMessages")
+  ReceivedMessages Message[]      @relation("ReceivedUserMessages")
+  Notifications    Notification[]
+
+  CreatedAt        DateTime       @default(now())
+  UpdatedAt        DateTime       @updatedAt
+
+  @@index([RoleId])
+}
+
+// 5. Teachers
+model Teacher {
+  Id               String          @id @default(uuid())
+  Name             String
+  Email            String          @unique
+  Password         String
+  Phone            String?
+  Address          String?
+  Gender           String?
+  Qualification    String?
+  JoiningDate      DateTime?
+
+  RoleId           String?
+  Role             Role?           @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  DepartmentId     String?
+  Department       Department?     @relation("TeacherDepartment", fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  HeadedDepts      Department[]    @relation("DepartmentHead")
+
+  ClassesTaught    Class[]         @relation("ClassTeacher")
+  SubjectsTaught   Subject[]       @relation("TeacherSubject")
+  Schedules        ClassSchedule[] @relation("TeacherSchedule")
+  AttRecorded      Attendance[]    @relation("TeacherAttendance")
+  ExamMarksEntered ExamsResult[]   @relation("TeacherExamMark")
+
+  CreatedAt        DateTime        @default(now())
+  UpdatedAt        DateTime        @updatedAt
+
+  @@index([DepartmentId])
+}
+
+// 6. Students
+model Student {
+  Id           String          @id @default(uuid())
+  RollNumber   String?         @unique
+  Name         String
+  Email        String          @unique
+  Password     String
+  Phone        String?
+  Address      String?
+  Gender       String?
+  DateOfBirth  DateTime?
+
+  RoleId       String?
+  Role         Role?           @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  ClassId      String?
+  Class        Class?          @relation("StudentClass", fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  DepartmentId String?
+  Department   Department?     @relation("StudentDepartment", fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  Admissions   Admission[]
+  Attendances  Attendance[]
+  ExamsResults ExamsResult[]
+  Fees         FeeManagement[]
+
+  CreatedAt    DateTime        @default(now())
+  UpdatedAt    DateTime        @updatedAt
+
+  @@index([ClassId])
+  @@index([DepartmentId])
+}
+
+// 7. Classes
+model Class {
+  Id             String          @id @default(uuid())
+  Name           String
+  Section        String
+  RoomNumber     String?
+  Capacity       Int             @default(40)
+
+  ClassTeacherId String?
+  ClassTeacher   Teacher?        @relation("ClassTeacher", fields: [ClassTeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  Students       Student[]       @relation("StudentClass")
+  Subjects       Subject[]
+  Schedules      ClassSchedule[]
+  Attendances    Attendance[]
+  Admissions     Admission[]
+
+  CreatedAt      DateTime        @default(now())
+  UpdatedAt      DateTime        @updatedAt
+
+  @@unique([Name, Section])
+}
+
+// 8. Subjects
+model Subject {
+  Id           String          @id @default(uuid())
+  Name         String
+  Code         String          @unique
+
+  DepartmentId String?
+  Department   Department?     @relation(fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  TeacherId    String?
+  Teacher      Teacher?        @relation("TeacherSubject", fields: [TeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  ClassId      String?
+  Class        Class?          @relation(fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  Schedules    ClassSchedule[]
+  ExamsResults ExamsResult[]
+  Attendances  Attendance[]
+
+  CreatedAt    DateTime        @default(now())
+  UpdatedAt    DateTime        @updatedAt
+}
+
+// 9. Class Schedules
+model ClassSchedule {
+  Id        String   @id @default(uuid())
+  ClassId   String
+  Class     Class    @relation(fields: [ClassId], references: [Id], onDelete: Cascade)
+  SubjectId String
+  Subject   Subject  @relation(fields: [SubjectId], references: [Id], onDelete: Cascade)
+  TeacherId String
+  Teacher   Teacher  @relation("TeacherSchedule", fields: [TeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  DayOfWeek String
+  StartTime String
+  EndTime   String
+  RoomNo    String?
+
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+
+  @@index([ClassId])
+  @@index([TeacherId])
+}
+
+// 10. Admissions
+model Admission {
+  Id            String   @id @default(uuid())
+  ApplicationNo String   @unique
+  StudentId     String
+  Student       Student  @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
+  ClassId       String
+  Class         Class    @relation(fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  AcademicYear  String
+  AdmissionDate DateTime @default(now())
+  Status        String   @default("PENDING")
+
+  CreatedAt     DateTime @default(now())
+  UpdatedAt     DateTime @updatedAt
+}
+
+// 11. Attendance
+model Attendance {
+  Id                  String   @id @default(uuid())
+  Date                DateTime
+  Status              String   @default("PRESENT")
+  StudentId           String
+  Student             Student  @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
+  ClassId             String
+  Class               Class    @relation(fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  SubjectId           String?
+  Subject             Subject? @relation(fields: [SubjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  RecordedByTeacherId String
+  RecordedByTeacher   Teacher  @relation("TeacherAttendance", fields: [RecordedByTeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  CreatedAt           DateTime @default(now())
+  UpdatedAt           DateTime @updatedAt
+
+  @@index([Date, ClassId])
+  @@index([StudentId])
+}
+
+// 12. Exams & Exam Results (Marks)
+model Exam {
+  Id           String        @id @default(uuid())
+  Title        String
+  Term         String
+  AcademicYear String
+  StartDate    DateTime
+  EndDate      DateTime
+
+  ExamsResults ExamsResult[]
+
+  CreatedAt    DateTime      @default(now())
+  UpdatedAt    DateTime      @updatedAt
+}
+
+model ExamsResult {
+  Id                  String   @id @default(uuid())
+  ExamId              String
+  Exam                Exam     @relation(fields: [ExamId], references: [Id], onDelete: Cascade)
+  StudentId           String
+  Student             Student  @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
+  SubjectId           String
+  Subject             Subject  @relation(fields: [SubjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  RecordedByTeacherId String?
+  RecordedByTeacher   Teacher? @relation("TeacherExamMark", fields: [RecordedByTeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  MarksObtained       Float
+  TotalMarks          Float    @default(100)
+  Grade               String?
+  Remarks             String?
+
+  CreatedAt           DateTime @default(now())
+  UpdatedAt           DateTime @updatedAt
+
+  @@unique([ExamId, StudentId, SubjectId])
+}
+
+// 13. Fee Management
+model FeeManagement {
+  Id            String    @id @default(uuid())
+  InvoiceNo     String    @unique
+  StudentId     String
+  Student       Student   @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
+  FeeType       String    @default("TUITION")
+  Amount        Float
+  PaidAmount    Float     @default(0)
+  DueDate       DateTime
+  PaymentDate   DateTime?
+  PaymentMethod String?
+  Status        String    @default("UNPAID")
+
+  CreatedAt     DateTime  @default(now())
+  UpdatedAt     DateTime  @updatedAt
+
+  @@index([StudentId])
+  @@index([Status])
+}
+
+// 14. Messages
+model Message {
+  Id         String   @id @default(uuid())
+  SenderId   String
+  Sender     User     @relation("SentUserMessages", fields: [SenderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ReceiverId String
+  Receiver   User     @relation("ReceivedUserMessages", fields: [ReceiverId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Subject    String?
+  Content    String
+  IsRead     Boolean  @default(false)
+
+  CreatedAt  DateTime @default(now())
+
+  @@index([SenderId])
+  @@index([ReceiverId])
+}
+
+// 15. Notifications
+model Notification {
+  Id        String   @id @default(uuid())
+  UserId    String
+  User      User     @relation(fields: [UserId], references: [Id], onDelete: Cascade)
+  Title     String
+  Message   String
+  Type      String?
+  IsRead    Boolean  @default(false)
+
+  CreatedAt DateTime @default(now())
+
+  @@index([UserId])
+}
