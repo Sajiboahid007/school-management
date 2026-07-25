@@ -1,0 +1,111 @@
+<div class="user-management-container">
+
+  <!-- PrimeNG Confirm Dialog -->
+  <p-confirmDialog header="Confirm Action" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+  <!-- Page Header Bar -->
+  <div class="page-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <i class="pi pi-calendar"></i>
+      </div>
+      <div>
+        <h2 class="header-title">Class Schedule Management</h2>
+        <p class="header-subtitle">Plan and coordinate weekly classes, lecture rooms, and instructor hours</p>
+      </div>
+    </div>
+
+    <!-- Top Add Schedule Button -->
+    <button pButton type="button" label="Add Period" icon="pi pi-plus" class="p-button-indigo btn-add-user"
+      (click)="onAddSchedule()">
+    </button>
+  </div>
+
+  <!-- Main Schedule Table Card -->
+  <div class="card p-card-custom">
+    <p-table #dt [value]="schedules" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50, 100]" [paginator]="true"
+      [loading]="isLoading" [globalFilterFields]="['Class.Name', 'Subject.Name', 'Teacher.Name', 'DayOfWeek', 'RoomNo']"
+      styleClass="p-datatable-striped custom-user-table">
+
+      <!-- CAPTION: Search & Global Filter -->
+      <ng-template pTemplate="caption">
+        <div class="caption-flex">
+          <div class="search-input-box">
+            <span class="p-input-icon-left w-full">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Search by class section, subject code, instructor, venue room..." class="w-full" />
+            </span>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- TABLE HEADER -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="DayOfWeek">Day of Week <p-sortIcon field="DayOfWeek"></p-sortIcon></th>
+          <th pSortableColumn="StartTime">Time Slot <p-sortIcon field="StartTime"></p-sortIcon></th>
+          <th pSortableColumn="Class.Name">Class Section <p-sortIcon field="Class.Name"></p-sortIcon></th>
+          <th pSortableColumn="Subject.Name">Subject Module <p-sortIcon field="Subject.Name"></p-sortIcon></th>
+          <th pSortableColumn="Teacher.Name">Instructor <p-sortIcon field="Teacher.Name"></p-sortIcon></th>
+          <th pSortableColumn="RoomNo">Room / Venue <p-sortIcon field="RoomNo"></p-sortIcon></th>
+          <th class="text-right">Action</th>
+        </tr>
+      </ng-template>
+
+      <!-- TABLE BODY -->
+      <ng-template pTemplate="body" let-sch>
+        <tr>
+          <td>
+            <p-tag [value]="getDayLabel(sch?.DayOfWeek)" severity="info"></p-tag>
+          </td>
+          <td>
+            <span class="text-sub font-semibold">{{ sch?.StartTime }} - {{ sch?.EndTime }}</span>
+          </td>
+          <td>
+            <span class="text-sub font-semibold">{{ sch?.Class?.Name }} ({{ sch?.Class?.Section }})</span>
+          </td>
+          <td>
+            <span class="user-name-text">{{ sch?.Subject?.Name }}</span>
+            <span class="text-muted-sub block font-mono" *ngIf="sch?.Subject?.Code">({{ sch?.Subject?.Code }})</span>
+          </td>
+          <td>
+            <div class="user-name-cell">
+              <div class="user-avatar">
+                {{ (sch?.Teacher?.Name || 'T')[0] | uppercase }}
+              </div>
+              <div class="user-details-col">
+                <span class="user-name-text">{{ sch?.Teacher?.Name }}</span>
+                <span class="text-muted-sub" *ngIf="sch?.Teacher?.Email">{{ sch?.Teacher?.Email }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="text-sub font-mono font-semibold">{{ sch?.RoomNo || 'N/A' }}</span>
+          </td>
+          <td class="text-right">
+            <button pButton type="button" icon="pi pi-pencil" title="Edit Period"
+              class="p-button-success p-button-outlined p-button-sm action-btn m-1" (click)="onEditSchedule(sch)">
+            </button>
+            <button pButton type="button" icon="pi pi-trash" title="Delete Period"
+              class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteSchedule(sch.Id)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- EMPTY STATE -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="empty-state">
+            <div class="empty-box">
+              <i class="pi pi-folder-open"></i>
+              <p>No class schedule slots found</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>

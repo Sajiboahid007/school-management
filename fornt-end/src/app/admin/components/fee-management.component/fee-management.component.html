@@ -1,0 +1,337 @@
+<div class="user-management-container">
+
+  <p-confirmDialog header="Confirm Action" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <i class="pi pi-credit-card"></i>
+      </div>
+      <div>
+        <h2 class="header-title">Fee Management</h2>
+        <p class="header-subtitle">Record student fees, manage active tuition billing, and generate invoice receipts</p>
+      </div>
+    </div>
+
+    <!-- Tab Switcher -->
+    <div class="p-selectbutton-custom">
+      <button pButton type="button" label="Active Classes"
+        [class]="activeTab === 'classes' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('classes')"></button>
+      <button pButton type="button" label="Class Fee Report"
+        [class]="activeTab === 'report' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('report')"></button>
+      <button pButton type="button" label="Billing Ledger"
+        [class]="activeTab === 'history' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('history')"></button>
+    </div>
+  </div>
+
+  <div class="card p-card-custom">
+
+    <!-- ─────────────────────────── TAB 1: ACTIVE CLASSES ─────────────────────────── -->
+    <div *ngIf="activeTab === 'classes'">
+      <p-table #dtClasses [value]="classes" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
+        [paginator]="true" [loading]="isLoadingClasses"
+        [globalFilterFields]="['Name','Section','RoomNumber','ClassTeacher.Name']"
+        styleClass="p-datatable-striped custom-user-table">
+
+        <ng-template pTemplate="caption">
+          <div class="caption-flex">
+            <div class="search-input-box">
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text"
+                  (input)="dtClasses.filterGlobal($any($event.target).value,'contains')"
+                  placeholder="Search classes…" class="w-full" />
+              </span>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="Name">Class Name <p-sortIcon field="Name"></p-sortIcon></th>
+            <th pSortableColumn="Section">Section <p-sortIcon field="Section"></p-sortIcon></th>
+            <th pSortableColumn="RoomNumber">Room <p-sortIcon field="RoomNumber"></p-sortIcon></th>
+            <th pSortableColumn="ClassTeacher.Name">Fee Manager (Class Teacher) <p-sortIcon field="ClassTeacher.Name"></p-sortIcon></th>
+            <th class="text-right">Action</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-cls>
+          <tr>
+            <td><span class="user-name-text">{{ cls?.Name }}</span></td>
+            <td><p-tag [value]="cls?.Section" severity="info"></p-tag></td>
+            <td><span class="text-sub font-mono">{{ cls?.RoomNumber || 'N/A' }}</span></td>
+            <td>
+              <div class="user-name-cell" *ngIf="cls?.ClassTeacher; else noTeacher">
+                <div class="user-avatar">{{ (cls?.ClassTeacher?.Name || 'T')[0] | uppercase }}</div>
+                <div class="user-details-col">
+                  <span class="user-name-text">{{ cls?.ClassTeacher?.Name }}</span>
+                  <span class="text-muted-sub" *ngIf="cls?.ClassTeacher?.Email">{{ cls?.ClassTeacher?.Email }}</span>
+                </div>
+              </div>
+              <ng-template #noTeacher><p-tag value="Unassigned" severity="secondary"></p-tag></ng-template>
+            </td>
+            <td class="text-right">
+              <button pButton type="button" label="Collect Fees" icon="pi pi-credit-card"
+                class="p-button-indigo p-button-sm font-semibold"
+                style="border-radius:8px;padding:0.4rem 0.9rem;" (click)="onCollectFees(cls)">
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="5" class="empty-state"><div class="empty-box"><i class="pi pi-folder-open"></i><p>No class records found</p></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- ─────────────────────────── TAB 2: CLASS FEE REPORT ─────────────────────────── -->
+    <div *ngIf="activeTab === 'report'">
+
+      <!-- Filter Ribbon -->
+      <div class="filter-ribbon">
+        <div class="filter-inputs-group">
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Class:</span>
+            <p-select [options]="classOptions" [(ngModel)]="selectedClassId"
+              (onChange)="onReportParamChange()" placeholder="Select Class"
+              style="width:170px !important;">
+            </p-select>
+          </div>
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Fee Type:</span>
+            <p-select [options]="feeTypeFilterOptions" [(ngModel)]="selectedFeeType"
+              (onChange)="onReportParamChange()" placeholder="All Types"
+              style="width:155px !important;">
+            </p-select>
+          </div>
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Month:</span>
+            <p-select [options]="monthOptions" [(ngModel)]="selectedMonth"
+              (onChange)="onReportParamChange()" placeholder="Select Month"
+              style="width:140px !important;">
+            </p-select>
+          </div>
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Year:</span>
+            <p-select [options]="yearOptions" [(ngModel)]="selectedYear"
+              (onChange)="onReportParamChange()" placeholder="Select Year"
+              style="width:110px !important;">
+            </p-select>
+          </div>
+        </div>
+        <div class="filter-legend">
+          <span class="legend-item"><i class="pi pi-check-circle text-success"></i> Paid</span>
+          <span class="legend-item"><i class="pi pi-exclamation-circle text-warning"></i> Partial</span>
+          <span class="legend-item"><i class="pi pi-times-circle text-danger"></i> Unpaid</span>
+        </div>
+      </div>
+
+      <!-- Report Table -->
+      <p-table [value]="reportRows" [loading]="isLoadingReport"
+        styleClass="p-datatable-striped custom-user-table"
+        [globalFilterFields]="['Name','RollNumber','Status']"
+        dataKey="StudentId">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="RollNumber">Roll No <p-sortIcon field="RollNumber"></p-sortIcon></th>
+            <th pSortableColumn="Name">Student Name <p-sortIcon field="Name"></p-sortIcon></th>
+            <th pSortableColumn="TotalBilled" class="text-right">Total Billed <p-sortIcon field="TotalBilled"></p-sortIcon></th>
+            <th pSortableColumn="TotalPaid" class="text-right">Total Paid <p-sortIcon field="TotalPaid"></p-sortIcon></th>
+            <th pSortableColumn="Balance" class="text-right">Balance Due <p-sortIcon field="Balance"></p-sortIcon></th>
+            <th pSortableColumn="Status">Status <p-sortIcon field="Status"></p-sortIcon></th>
+            <th class="text-right">Invoices</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td><span class="text-sub font-mono font-semibold text-sm">{{ row.RollNumber }}</span></td>
+            <td>
+              <div class="user-name-cell">
+                <div class="user-avatar">{{ (row.Name || 'S')[0] | uppercase }}</div>
+                <span class="user-name-text ml-2">{{ row.Name }}</span>
+              </div>
+            </td>
+            <td class="text-right"><span class="text-sub font-semibold">${{ row.TotalBilled }}</span></td>
+            <td class="text-right"><span class="text-success font-semibold">${{ row.TotalPaid }}</span></td>
+            <td class="text-right">
+              <span [class]="row.Balance > 0 ? 'text-danger font-semibold' : 'text-success font-semibold'">
+                ${{ row.Balance }}
+              </span>
+            </td>
+            <td>
+              <p-tag [value]="row.Status" [severity]="getStatusSeverity(row.Status)"></p-tag>
+            </td>
+            <td class="text-right">
+              <ng-container *ngIf="row.Invoices.length > 0; else noInvoice">
+                <button pButton type="button" icon="pi pi-print"
+                  class="p-button-indigo p-button-outlined p-button-sm action-btn"
+                  title="View receipt"
+                  (click)="onViewReceipt(row.Invoices[row.Invoices.length - 1])">
+                </button>
+              </ng-container>
+              <ng-template #noInvoice><span class="text-muted-sub text-sm">—</span></ng-template>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="empty-state">
+              <div class="empty-box">
+                <i class="pi pi-folder-open"></i>
+                <p>No fee records for this class in the selected period.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- ─────────────────────────── TAB 3: BILLING LEDGER ─────────────────────────── -->
+    <div *ngIf="activeTab === 'history'">
+      <p-table #dtLogs [value]="fees" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
+        [paginator]="true" [loading]="isLoadingHistory"
+        [globalFilterFields]="['InvoiceNo','Student.Name','FeeType','Status','PaymentMethod']"
+        styleClass="p-datatable-striped custom-user-table">
+
+        <ng-template pTemplate="caption">
+          <div class="caption-flex">
+            <div class="search-input-box">
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text"
+                  (input)="dtLogs.filterGlobal($any($event.target).value,'contains')"
+                  placeholder="Search invoice, student, category…" class="w-full" />
+              </span>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="InvoiceNo">Invoice No <p-sortIcon field="InvoiceNo"></p-sortIcon></th>
+            <th pSortableColumn="Student.Name">Student <p-sortIcon field="Student.Name"></p-sortIcon></th>
+            <th pSortableColumn="FeeType">Category <p-sortIcon field="FeeType"></p-sortIcon></th>
+            <th pSortableColumn="Amount">Amount <p-sortIcon field="Amount"></p-sortIcon></th>
+            <th pSortableColumn="PaidAmount">Paid <p-sortIcon field="PaidAmount"></p-sortIcon></th>
+            <th pSortableColumn="DueDate">Due Date <p-sortIcon field="DueDate"></p-sortIcon></th>
+            <th pSortableColumn="Status">Status <p-sortIcon field="Status"></p-sortIcon></th>
+            <th class="text-right">Action</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-fee>
+          <tr>
+            <td><span class="text-sub font-mono font-semibold text-sm">{{ fee?.InvoiceNo }}</span></td>
+            <td>
+              <div class="user-name-cell">
+                <div class="user-avatar">{{ (fee?.Student?.Name || 'S')[0] | uppercase }}</div>
+                <div class="user-details-col">
+                  <span class="user-name-text">{{ fee?.Student?.Name }}</span>
+                  <span class="text-muted-sub" *ngIf="fee?.Student?.RollNumber">Roll: {{ fee?.Student?.RollNumber }}</span>
+                </div>
+              </div>
+            </td>
+            <td><span class="text-sub font-semibold">{{ fee?.FeeType }}</span></td>
+            <td><span class="text-sub font-semibold">${{ fee?.Amount }}</span></td>
+            <td><span class="text-success font-semibold">${{ fee?.PaidAmount }}</span></td>
+            <td><span class="text-sub">{{ fee?.DueDate | date:'yyyy-MM-dd' }}</span></td>
+            <td><p-tag [value]="fee?.Status" [severity]="getStatusSeverity(fee?.Status)"></p-tag></td>
+            <td class="text-right">
+              <button pButton type="button" icon="pi pi-print" title="Print Receipt"
+                class="p-button-indigo p-button-outlined p-button-sm action-btn m-1"
+                (click)="onViewReceipt(fee)">
+              </button>
+              <button pButton type="button" icon="pi pi-trash" title="Delete"
+                class="p-button-danger p-button-outlined p-button-sm action-btn m-1"
+                (click)="onDeleteFee(fee.Id)">
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="8" class="empty-state"><div class="empty-box"><i class="pi pi-folder-open"></i><p>No fee billing records found</p></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─────────────── RECEIPT DIALOG ─────────────── -->
+<p-dialog header="Payment Receipt" [(visible)]="receiptVisible" [modal]="true"
+  [style]="{ width: '480px' }" [dismissableMask]="true">
+  <div class="p-4" id="receipt-print-area" *ngIf="selectedReceipt">
+    <div style="text-align:center;border-bottom:2px solid #e2e8f0;padding-bottom:1rem;margin-bottom:1.5rem;">
+      <h2 style="margin:0;font-size:1.5rem;color:#1e1b4b;font-weight:bold;">FEES RECEIPT</h2>
+      <p style="margin:0.25rem 0 0 0;font-size:0.85rem;color:#64748b;font-weight:500;">SCHOOL MANAGEMENT SYSTEM</p>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:1.5rem;font-size:0.875rem;">
+      <div>
+        <p style="margin:0 0 0.25rem 0;"><strong>Invoice No:</strong> {{ selectedReceipt.InvoiceNo }}</p>
+        <p style="margin:0;"><strong>Payment Date:</strong> {{ (selectedReceipt.PaymentDate | date:'yyyy-MM-dd') || 'N/A' }}</p>
+      </div>
+      <div style="text-align:right;">
+        <p style="margin:0 0 0.25rem 0;"><strong>Due Date:</strong> {{ selectedReceipt.DueDate | date:'yyyy-MM-dd' }}</p>
+        <p style="margin:0;"><strong>Status:</strong> <span style="font-weight:bold;color:#16a34a;">{{ selectedReceipt.Status }}</span></p>
+      </div>
+    </div>
+
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;">
+      <p style="margin:0 0 0.35rem 0;"><strong>Student Name:</strong> {{ selectedReceipt.Student?.Name }}</p>
+      <p style="margin:0 0 0.35rem 0;"><strong>Roll Number:</strong> {{ selectedReceipt.Student?.RollNumber || 'N/A' }}</p>
+      <p style="margin:0;"><strong>Class:</strong> {{ selectedReceipt.Student?.Class?.Name || 'N/A' }} ({{ selectedReceipt.Student?.Class?.Section || 'N/A' }})</p>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:0.875rem;">
+      <thead>
+        <tr style="border-bottom:2px solid #cbd5e1;background:#f1f5f9;">
+          <th style="padding:0.5rem 0.75rem;font-weight:bold;text-align:left;">Description</th>
+          <th style="padding:0.5rem 0.75rem;text-align:right;font-weight:bold;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:0.75rem;">{{ selectedReceipt.FeeType }}</td>
+          <td style="padding:0.75rem;text-align:right;font-weight:600;">${{ selectedReceipt.Amount }}</td>
+        </tr>
+        <tr>
+          <td style="padding:0.75rem;font-weight:bold;">Total Paid:</td>
+          <td style="padding:0.75rem;text-align:right;font-weight:bold;color:#16a34a;">${{ selectedReceipt.PaidAmount }}</td>
+        </tr>
+        <tr style="border-top:1px dashed #cbd5e1;">
+          <td style="padding:0.75rem;font-weight:bold;">Balance Due:</td>
+          <td style="padding:0.75rem;text-align:right;font-weight:bold;color:#dc2626;">
+            ${{ (selectedReceipt.Amount || 0) - (selectedReceipt.PaidAmount || 0) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-size:0.825rem;color:#64748b;">
+      <p style="margin:0;"><strong>Payment Method:</strong> {{ selectedReceipt.PaymentMethod || 'N/A' }}</p>
+    </div>
+
+    <div style="text-align:center;border-top:1px dashed #cbd5e1;padding-top:1rem;margin-top:2rem;font-size:0.75rem;color:#94a3b8;">
+      <p style="margin:0;">System generated fee billing transaction receipt.</p>
+      <p style="margin:0.25rem 0 0 0;">Thank you for your payment!</p>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2 p-3">
+      <button pButton label="Close" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="receiptVisible = false"></button>
+      <button pButton label="Print" icon="pi pi-print" class="p-button-indigo" (click)="onPrintReceipt()"></button>
+    </div>
+  </ng-template>
+</p-dialog>

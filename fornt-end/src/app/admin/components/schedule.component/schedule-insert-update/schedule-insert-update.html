@@ -1,0 +1,142 @@
+<div class="user-modal-wrapper">
+
+  <!-- Header Banner -->
+  <div class="modal-banner">
+    <div class="banner-avatar">
+      <i class="pi" [ngClass]="isEdit ? 'pi-user-edit' : 'pi-user-plus'"></i>
+    </div>
+    <div class="banner-content">
+      <h3 class="banner-title">{{ isEdit ? 'Edit Schedule Details' : 'Add Class Schedule' }}</h3>
+      <p class="banner-subtitle">
+        {{ isEdit ? 'Modify day, times, room numbers, class sections, or lecturers.' : 'Fill in schedule parameters to plan class lectures and periods.' }}
+      </p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Class -->
+      <div class="form-group col-6">
+        <label for="schClass" class="form-label">
+          Class Section <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-building input-icon"></i>
+          <p-select id="schClass" [options]="classOptions" [(ngModel)]="formData.ClassId" name="ClassId"
+            optionLabel="label" optionValue="value" placeholder="Select Class"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Subject -->
+      <div class="form-group col-6">
+        <label for="schSubject" class="form-label">
+          Subject Module <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-book input-icon"></i>
+          <p-select id="schSubject" [options]="subjectOptions" [(ngModel)]="formData.SubjectId" name="SubjectId"
+            optionLabel="label" optionValue="value" placeholder="Select Subject"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Teacher -->
+      <div class="form-group col-6">
+        <label for="schTeacher" class="form-label">
+          Instructor <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-user input-icon"></i>
+          <p-select id="schTeacher" [options]="teacherOptions" [(ngModel)]="formData.TeacherId" name="TeacherId"
+            optionLabel="label" optionValue="value" placeholder="Select Teacher"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Day Of Week -->
+      <div class="form-group col-6">
+        <label for="schDay" class="form-label">
+          Day of Week <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar input-icon"></i>
+          <p-select id="schDay" [options]="dayOptions" [(ngModel)]="formData.DayOfWeek" name="DayOfWeek"
+            optionLabel="label" optionValue="value" placeholder="Select Day"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Start Time -->
+      <div class="form-group col-6">
+        <label for="schStart" class="form-label">
+          Start Time <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-clock input-icon"></i>
+          <input id="schStart" type="text" pInputText [(ngModel)]="formData.StartTime" name="StartTime"
+            placeholder="e.g. 09:00" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- End Time -->
+      <div class="form-group col-6">
+        <label for="schEnd" class="form-label">
+          End Time <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-clock input-icon"></i>
+          <input id="schEnd" type="text" pInputText [(ngModel)]="formData.EndTime" name="EndTime"
+            placeholder="e.g. 10:30" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Room No -->
+      <div class="form-group col-12">
+        <label for="schRoom" class="form-label">Lecture Room / Venue</label>
+        <div class="input-with-icon">
+          <i class="pi pi-map input-icon"></i>
+          <input id="schRoom" type="text" pInputText [(ngModel)]="formData.RoomNo" name="RoomNo"
+            placeholder="e.g. Lab 302" class="w-full custom-input" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Create Schedule'"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

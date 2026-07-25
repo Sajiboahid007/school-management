@@ -1,0 +1,112 @@
+<div class="user-management-container">
+
+  <!-- PrimeNG Confirm Dialog -->
+  <p-confirmDialog header="Confirm Action" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+  <!-- Page Header Bar -->
+  <div class="page-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <i class="pi pi-id-card"></i>
+      </div>
+      <div>
+        <h2 class="header-title">Student Management</h2>
+        <p class="header-subtitle">Manage student enrollment, class assignments, and personal records</p>
+      </div>
+    </div>
+
+    <!-- Top Add Student Button -->
+    <button pButton type="button" label="Add Student" icon="pi pi-user-plus" class="p-button-indigo btn-add-user"
+      (click)="onAddStudent()">
+    </button>
+  </div>
+
+  <!-- Main Student Table Card -->
+  <div class="card p-card-custom">
+    <p-table #dt [value]="students" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50, 100]" [paginator]="true"
+      [loading]="isLoading" [globalFilterFields]="['RollNumber', 'Name', 'Email', 'Phone', 'Class.Name', 'Department.Name']"
+      styleClass="p-datatable-striped custom-user-table">
+
+      <!-- CAPTION: Search & Global Filter -->
+      <ng-template pTemplate="caption">
+        <div class="caption-flex">
+          <div class="search-input-box">
+            <span class="p-input-icon-left w-full">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Search by roll no, student name, email, class..." class="w-full" />
+            </span>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- TABLE HEADER -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="RollNumber">Roll No <p-sortIcon field="RollNumber"></p-sortIcon></th>
+          <th pSortableColumn="Name">Student <p-sortIcon field="Name"></p-sortIcon></th>
+          <th pSortableColumn="Email">Contact <p-sortIcon field="Email"></p-sortIcon></th>
+          <th pSortableColumn="Class.Name">Class <p-sortIcon field="Class.Name"></p-sortIcon></th>
+          <th pSortableColumn="Department.Name">Department <p-sortIcon field="Department.Name"></p-sortIcon></th>
+          <th class="text-right">Action</th>
+        </tr>
+      </ng-template>
+
+      <!-- TABLE BODY -->
+      <ng-template pTemplate="body" let-student>
+        <tr>
+          <td>
+            <span class="text-sub font-mono font-semibold">{{ student?.RollNumber || 'N/A' }}</span>
+          </td>
+          <td>
+            <div class="user-name-cell">
+              <div class="user-avatar">
+                {{ (student?.Name || 'S')[0] | uppercase }}
+              </div>
+              <div class="user-details-col">
+                <span class="user-name-text">{{ student?.Name }}</span>
+                <span class="text-muted-sub">{{ student?.Gender || 'Gender N/A' }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="contact-cell">
+              <span class="text-sub"><i class="pi pi-envelope icon-sub"></i> {{ student?.Email }}</span>
+              <span class="text-sub" *ngIf="student?.Phone"><i class="pi pi-phone icon-sub"></i> {{ student?.Phone }}</span>
+            </div>
+          </td>
+          <td>
+            <p-tag [value]="student?.Class?.Name ? (student?.Class?.Name + ' (' + (student?.Class?.Section || '') + ')') : 'Unassigned'"
+              [severity]="student?.Class?.Name ? 'info' : 'secondary'">
+            </p-tag>
+          </td>
+          <td>
+            <p-tag [value]="student?.Department?.Name || 'General'" [severity]="student?.Department?.Name ? 'warn' : 'secondary'">
+            </p-tag>
+          </td>
+          <td class="text-right">
+            <button pButton type="button" icon="pi pi-pencil" title="Edit Student"
+              class="p-button-success p-button-outlined p-button-sm action-btn m-1" (click)="onEditStudent(student.Id)">
+            </button>
+            <button pButton type="button" icon="pi pi-trash" title="Delete Student"
+              class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteStudent(student.Id)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- EMPTY STATE -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="empty-state">
+            <div class="empty-box">
+              <i class="pi pi-folder-open"></i>
+              <p>No student records found</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>

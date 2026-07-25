@@ -1,0 +1,145 @@
+<div class="user-modal-wrapper">
+
+  <!-- Compact inline header -->
+  <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem;">
+    <i class="pi pi-credit-card" style="font-size:1.1rem;color:#6366f1;"></i>
+    <div>
+      <span style="font-weight:700;font-size:1rem;color:#1e1b4b;">{{ classData?.Name }} ({{ classData?.Section }})</span>
+      <span style="font-size:0.8rem;color:#64748b;margin-left:0.5rem;">— set fee amounts and payment status per student</span>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Configuration fields (Type, Due Date, Payment Date, Method) -->
+    <div class="form-grid mb-3">
+      <!-- Fee Type -->
+      <div class="form-group col-6">
+        <label for="feeTypeSelect" class="form-label">
+          Fee Category <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-tags input-icon"></i>
+          <p-select id="feeTypeSelect" [options]="feeTypeOptions" [(ngModel)]="feeType" name="feeType"
+            optionLabel="label" optionValue="value" placeholder="Select Category"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Due Date -->
+      <div class="form-group col-6">
+        <label for="dueDateInput" class="form-label">
+          Due Date <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar-minus input-icon"></i>
+          <input id="dueDateInput" type="date" pInputText [(ngModel)]="dueDate" name="dueDate"
+            class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Payment Date -->
+      <div class="form-group col-6">
+        <label for="payDateInput" class="form-label">Payment Date</label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar-plus input-icon"></i>
+          <input id="payDateInput" type="date" pInputText [(ngModel)]="paymentDate" name="paymentDate"
+            class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="form-group col-6">
+        <label for="payMethodSelect" class="form-label">Payment Method</label>
+        <div class="input-with-icon">
+          <i class="pi pi-wallet input-icon"></i>
+          <p-select id="payMethodSelect" [options]="paymentMethodOptions" [(ngModel)]="paymentMethod" name="paymentMethod"
+            optionLabel="label" optionValue="value" placeholder="Select Method"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Fees List -->
+    <div class="card p-card-custom mb-3" style="max-height: 320px; overflow-y: auto; padding: 0.5rem 1rem;">
+      <h4 class="text-sub font-semibold mb-2" style="font-size: 0.95rem;">Student Tuition Fees</h4>
+      
+      <div *ngIf="isLoading" class="text-center py-4">
+        <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #6366f1;"></i>
+        <p class="text-muted-sub mt-2">Loading students...</p>
+      </div>
+
+      <div *ngIf="!isLoading && students.length === 0" class="text-center py-4">
+        <i class="pi pi-users text-muted-sub" style="font-size: 2rem;"></i>
+        <p class="text-muted-sub mt-2">No students enrolled in this class.</p>
+      </div>
+
+      <table class="w-full text-left" *ngIf="!isLoading && students.length > 0" style="border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e2e8f0;">
+            <th style="padding:0.5rem 0.75rem;text-transform:uppercase;font-size:0.72rem;color:#64748b;font-weight:700;width:52px;">Pay</th>
+            <th style="padding:0.5rem 0.75rem;text-transform:uppercase;font-size:0.72rem;color:#64748b;font-weight:700;">Roll No</th>
+            <th style="padding:0.5rem 0.75rem;text-transform:uppercase;font-size:0.72rem;color:#64748b;font-weight:700;">Student Name</th>
+            <th style="padding:0.5rem 0.75rem;text-transform:uppercase;font-size:0.72rem;color:#64748b;font-weight:700;text-align:right;">Fixed Fee</th>
+            <th style="padding:0.5rem 0.75rem;text-transform:uppercase;font-size:0.72rem;color:#64748b;font-weight:700;text-align:right;width:120px;">Paid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of students" style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding:0.9rem 0.75rem;">
+              <input type="checkbox" [(ngModel)]="s.IsPaying" [name]="'paying_' + s.StudentId" (change)="onPayingToggle(s)"
+                style="transform:scale(1.3); cursor:pointer;" />
+            </td>
+            <td style="padding:0.9rem 0.75rem; font-family:monospace; font-weight:600; font-size:0.85rem; color:#334155;">
+              {{ s.RollNumber }}
+            </td>
+            <td style="padding:0.9rem 0.75rem;">
+              <span style="font-weight:600; font-size:0.95rem; color:#1e293b;"
+                [style.text-decoration]="s.IsPaying ? 'none' : 'line-through'">{{ s.Name }}</span>
+            </td>
+            <td style="padding:0.9rem 0.75rem; text-align:right;">
+              <span style="font-weight:700; color:#334155;">${{ s.Amount }}</span>
+            </td>
+            <td style="padding:0.9rem 0.75rem; text-align:right;">
+              <input type="number" [(ngModel)]="s.PaidAmount" [name]="'paid_' + s.StudentId" [disabled]="!s.IsPaying"
+                (ngModelChange)="onPaidAmountChange(s)"
+                style="width:90px; border:1px solid #cbd5e1; border-radius:8px; padding:0.35rem 0.55rem; text-align:right; font-weight:600; font-size:0.9rem;"
+                min="0" [max]="s.Amount" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton label="Record Payments" icon="pi pi-check-circle" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

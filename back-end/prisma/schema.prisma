@@ -9,7 +9,7 @@ datasource db {
 
 // 1. Roles
 model Role {
-  Id          String    @id @default(uuid())
+  Id          Int       @id @default(autoincrement())
   Name        String    @unique
   Description String?
 
@@ -23,7 +23,7 @@ model Role {
 
 // 2. School Profile Information
 model SchoolInformation {
-  Id          String   @id @default(uuid())
+  Id          Int      @id @default(autoincrement())
   Name        String
   Code        String   @unique
   Address     String
@@ -39,12 +39,12 @@ model SchoolInformation {
 
 // 3. Departments / Streams
 model Department {
-  Id          String    @id @default(uuid())
+  Id          Int       @id @default(autoincrement())
   Name        String    @unique
   Code        String    @unique
   Description String?
 
-  HeadId      String?   
+  HeadId      Int?
   HeadTeacher Teacher?  @relation("DepartmentHead", fields: [HeadId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   Teachers    Teacher[] @relation("TeacherDepartment")
@@ -57,13 +57,13 @@ model Department {
 
 // 4. Base Users (Admins, Super Admins, Staff)
 model User {
-  Id               String         @id @default(uuid())
+  Id               Int            @id @default(autoincrement())
   Name             String
   Email            String         @unique
   Password         String
   Phone            String?
 
-  RoleId           String?
+  RoleId           Int?
   Role             Role?          @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   SentMessages     Message[]      @relation("SentUserMessages")
@@ -78,7 +78,7 @@ model User {
 
 // 5. Teachers
 model Teacher {
-  Id               String          @id @default(uuid())
+  Id               Int             @id @default(autoincrement())
   Name             String
   Email            String          @unique
   Password         String
@@ -88,10 +88,10 @@ model Teacher {
   Qualification    String?
   JoiningDate      DateTime?
 
-  RoleId           String?
+  RoleId           Int?
   Role             Role?           @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
-  DepartmentId     String?
+  DepartmentId     Int?
   Department       Department?     @relation("TeacherDepartment", fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   HeadedDepts      Department[]    @relation("DepartmentHead")
 
@@ -109,7 +109,7 @@ model Teacher {
 
 // 6. Students
 model Student {
-  Id           String          @id @default(uuid())
+  Id           Int             @id @default(autoincrement())
   RollNumber   String?         @unique
   Name         String
   Email        String          @unique
@@ -119,13 +119,13 @@ model Student {
   Gender       String?
   DateOfBirth  DateTime?
 
-  RoleId       String?
+  RoleId       Int?
   Role         Role?           @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
-  ClassId      String?
+  ClassId      Int?
   Class        Class?          @relation("StudentClass", fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
-  DepartmentId String?
+  DepartmentId Int?
   Department   Department?     @relation("StudentDepartment", fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   Admissions   Admission[]
@@ -142,13 +142,13 @@ model Student {
 
 // 7. Classes
 model Class {
-  Id             String          @id @default(uuid())
+  Id             Int             @id @default(autoincrement())
   Name           String
   Section        String
   RoomNumber     String?
   Capacity       Int             @default(40)
 
-  ClassTeacherId String?
+  ClassTeacherId Int?
   ClassTeacher   Teacher?        @relation("ClassTeacher", fields: [ClassTeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   Students       Student[]       @relation("StudentClass")
@@ -165,17 +165,17 @@ model Class {
 
 // 8. Subjects
 model Subject {
-  Id           String          @id @default(uuid())
+  Id           Int             @id @default(autoincrement())
   Name         String
   Code         String          @unique
 
-  DepartmentId String?
+  DepartmentId Int?
   Department   Department?     @relation(fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
-  TeacherId    String?
+  TeacherId    Int?
   Teacher      Teacher?        @relation("TeacherSubject", fields: [TeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
-  ClassId      String?
+  ClassId      Int?
   Class        Class?          @relation(fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   Schedules    ClassSchedule[]
@@ -188,12 +188,12 @@ model Subject {
 
 // 9. Class Schedules
 model ClassSchedule {
-  Id        String   @id @default(uuid())
-  ClassId   String
+  Id        Int      @id @default(autoincrement())
+  ClassId   Int
   Class     Class    @relation(fields: [ClassId], references: [Id], onDelete: Cascade)
-  SubjectId String
+  SubjectId Int
   Subject   Subject  @relation(fields: [SubjectId], references: [Id], onDelete: Cascade)
-  TeacherId String
+  TeacherId Int
   Teacher   Teacher  @relation("TeacherSchedule", fields: [TeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   DayOfWeek String
@@ -210,11 +210,11 @@ model ClassSchedule {
 
 // 10. Admissions
 model Admission {
-  Id            String   @id @default(uuid())
+  Id            Int      @id @default(autoincrement())
   ApplicationNo String   @unique
-  StudentId     String
+  StudentId     Int
   Student       Student  @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
-  ClassId       String
+  ClassId       Int
   Class         Class    @relation(fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   AcademicYear  String
   AdmissionDate DateTime @default(now())
@@ -226,16 +226,16 @@ model Admission {
 
 // 11. Attendance
 model Attendance {
-  Id                  String   @id @default(uuid())
+  Id                  Int      @id @default(autoincrement())
   Date                DateTime
   Status              String   @default("PRESENT")
-  StudentId           String
+  StudentId           Int
   Student             Student  @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
-  ClassId             String
+  ClassId             Int
   Class               Class    @relation(fields: [ClassId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  SubjectId           String?
+  SubjectId           Int?
   Subject             Subject? @relation(fields: [SubjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  RecordedByTeacherId String
+  RecordedByTeacherId Int
   RecordedByTeacher   Teacher  @relation("TeacherAttendance", fields: [RecordedByTeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   CreatedAt           DateTime @default(now())
@@ -247,7 +247,7 @@ model Attendance {
 
 // 12. Exams & Exam Results (Marks)
 model Exam {
-  Id           String        @id @default(uuid())
+  Id           Int           @id @default(autoincrement())
   Title        String
   Term         String
   AcademicYear String
@@ -261,14 +261,14 @@ model Exam {
 }
 
 model ExamsResult {
-  Id                  String   @id @default(uuid())
-  ExamId              String
+  Id                  Int      @id @default(autoincrement())
+  ExamId              Int
   Exam                Exam     @relation(fields: [ExamId], references: [Id], onDelete: Cascade)
-  StudentId           String
+  StudentId           Int
   Student             Student  @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
-  SubjectId           String
+  SubjectId           Int
   Subject             Subject  @relation(fields: [SubjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  RecordedByTeacherId String?
+  RecordedByTeacherId Int?
   RecordedByTeacher   Teacher? @relation("TeacherExamMark", fields: [RecordedByTeacherId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 
   MarksObtained       Float
@@ -284,9 +284,9 @@ model ExamsResult {
 
 // 13. Fee Management
 model FeeManagement {
-  Id            String    @id @default(uuid())
+  Id            Int       @id @default(autoincrement())
   InvoiceNo     String    @unique
-  StudentId     String
+  StudentId     Int
   Student       Student   @relation(fields: [StudentId], references: [Id], onDelete: Cascade)
   FeeType       String    @default("TUITION")
   Amount        Float
@@ -305,10 +305,10 @@ model FeeManagement {
 
 // 14. Messages
 model Message {
-  Id         String   @id @default(uuid())
-  SenderId   String
+  Id         Int      @id @default(autoincrement())
+  SenderId   Int
   Sender     User     @relation("SentUserMessages", fields: [SenderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ReceiverId String
+  ReceiverId Int
   Receiver   User     @relation("ReceivedUserMessages", fields: [ReceiverId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Subject    String?
   Content    String
@@ -322,8 +322,8 @@ model Message {
 
 // 15. Notifications
 model Notification {
-  Id        String   @id @default(uuid())
-  UserId    String
+  Id        Int      @id @default(autoincrement())
+  UserId    Int
   User      User     @relation(fields: [UserId], references: [Id], onDelete: Cascade)
   Title     String
   Message   String

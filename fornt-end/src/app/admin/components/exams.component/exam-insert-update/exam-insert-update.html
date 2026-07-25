@@ -1,0 +1,208 @@
+<div class="user-modal-wrapper">
+
+  <!-- Header Banner -->
+  <div class="modal-banner">
+    <div class="banner-avatar">
+      <i class="pi" [ngClass]="isEdit ? 'pi-pencil' : 'pi-plus'"></i>
+    </div>
+    <div class="banner-content">
+      <h3 class="banner-title">
+        {{ type === 'exam' ? (isEdit ? 'Edit Exam Details' : 'Create Academic Exam') : (isEdit ? 'Edit Grade Marksheet' : 'Record Student Marks') }}
+      </h3>
+      <p class="banner-subtitle">
+        {{ type === 'exam' ? 'Define exam title, term, year, and scheduling timelines.' : 'Input student performance marks, grades, and teacher remarks.' }}
+      </p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <!-- EXAM FORM GRID -->
+    <div class="form-grid" *ngIf="type === 'exam'">
+      <!-- Title -->
+      <div class="form-group col-12">
+        <label for="exTitle" class="form-label">
+          Exam Title <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-bookmark input-icon"></i>
+          <input id="exTitle" type="text" pInputText [(ngModel)]="examData.Title" name="Title"
+            placeholder="e.g. Midterm Examination" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Term -->
+      <div class="form-group col-6">
+        <label for="exTerm" class="form-label">
+          Term / Semester <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-clock input-icon"></i>
+          <input id="exTerm" type="text" pInputText [(ngModel)]="examData.Term" name="Term"
+            placeholder="e.g. Fall Semester" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Academic Year -->
+      <div class="form-group col-6">
+        <label for="exYear" class="form-label">
+          Academic Year <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar input-icon"></i>
+          <input id="exYear" type="text" pInputText [(ngModel)]="examData.AcademicYear" name="AcademicYear"
+            placeholder="e.g. 2026-2027" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Start Date -->
+      <div class="form-group col-6">
+        <label for="exStart" class="form-label">Start Date</label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar-plus input-icon"></i>
+          <input id="exStart" type="date" pInputText [(ngModel)]="examData.StartDate" name="StartDate"
+            class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- End Date -->
+      <div class="form-group col-6">
+        <label for="exEnd" class="form-label">End Date</label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar-minus input-icon"></i>
+          <input id="exEnd" type="date" pInputText [(ngModel)]="examData.EndDate" name="EndDate"
+            class="w-full custom-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT FORM GRID -->
+    <div class="form-grid" *ngIf="type === 'result'">
+      <!-- Exam Selection -->
+      <div class="form-group col-6">
+        <label for="resExam" class="form-label">
+          Exam Schedule <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-bookmark input-icon"></i>
+          <p-select id="resExam" [options]="examOptions" [(ngModel)]="resultData.ExamId" name="ExamId"
+            optionLabel="label" optionValue="value" placeholder="Select Exam"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Student Selection -->
+      <div class="form-group col-6">
+        <label for="resStudent" class="form-label">
+          Student <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-user input-icon"></i>
+          <p-select id="resStudent" [options]="studentOptions" [(ngModel)]="resultData.StudentId" name="StudentId"
+            optionLabel="label" optionValue="value" placeholder="Select Student" [filter]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Subject Selection -->
+      <div class="form-group col-6">
+        <label for="resSubject" class="form-label">
+          Subject <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-book input-icon"></i>
+          <p-select id="resSubject" [options]="subjectOptions" [(ngModel)]="resultData.SubjectId" name="SubjectId"
+            optionLabel="label" optionValue="value" placeholder="Select Subject"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Recorded By Selection -->
+      <div class="form-group col-6">
+        <label for="resTeacher" class="form-label">Recorded By (Teacher)</label>
+        <div class="input-with-icon">
+          <i class="pi pi-user-edit input-icon"></i>
+          <p-select id="resTeacher" [options]="teacherOptions" [(ngModel)]="resultData.RecordedByTeacherId" name="RecordedByTeacherId"
+            optionLabel="label" optionValue="value" placeholder="Select Instructor" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Marks Obtained -->
+      <div class="form-group col-6">
+        <label for="resMarks" class="form-label">
+          Marks Obtained <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-percentage input-icon"></i>
+          <input id="resMarks" type="number" pInputText [(ngModel)]="resultData.MarksObtained" name="MarksObtained"
+            class="w-full custom-input" min="0" required />
+        </div>
+      </div>
+
+      <!-- Total Marks -->
+      <div class="form-group col-6">
+        <label for="resTotal" class="form-label">Total Marks</label>
+        <div class="input-with-icon">
+          <i class="pi pi-plus input-icon"></i>
+          <input id="resTotal" type="number" pInputText [(ngModel)]="resultData.TotalMarks" name="TotalMarks"
+            class="w-full custom-input" min="1" />
+        </div>
+      </div>
+
+      <!-- Grade -->
+      <div class="form-group col-6">
+        <label for="resGrade" class="form-label">Grade</label>
+        <div class="input-with-icon">
+          <i class="pi pi-star input-icon"></i>
+          <input id="resGrade" type="text" pInputText [(ngModel)]="resultData.Grade" name="Grade"
+            placeholder="e.g. A+" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Remarks -->
+      <div class="form-group col-6">
+        <label for="resRemarks" class="form-label">Remarks</label>
+        <div class="input-with-icon">
+          <i class="pi pi-info input-icon"></i>
+          <input id="resRemarks" type="text" pInputText [(ngModel)]="resultData.Remarks" name="Remarks"
+            placeholder="e.g. Excellent progress" class="w-full custom-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Record Entry'"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

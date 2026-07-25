@@ -17,11 +17,16 @@ router.get("/admission/get", async (req, res) => {
 router.post("/admission/add", async (req, res) => {
     try {
         const { ApplicationNo, StudentId, ClassId, AcademicYear, AdmissionDate, Status } = req.body;
-        const data: any = { ApplicationNo, StudentId, ClassId, AcademicYear };
-        if (AdmissionDate) data.AdmissionDate = new Date(AdmissionDate);
-        if (Status) data.Status = Status;
-
-        const admission = await prisma.admission.create({ data });
+        const admission = await prisma.admission.create({
+            data: {
+                ApplicationNo,
+                StudentId: Number(StudentId),
+                ClassId: Number(ClassId),
+                AcademicYear,
+                AdmissionDate: AdmissionDate ? new Date(AdmissionDate) : undefined,
+                Status,
+            },
+        });
         res.status(201).json({ data: admission, message: "Admission created successfully" });
     } catch (error) {
         res.status(400).json({ error: "Failed to create admission" });
@@ -32,7 +37,7 @@ router.delete("/admission/delete", async (req, res) => {
     try {
         const { id } = req.body;
         const admission = await prisma.admission.delete({
-            where: { Id: id },
+            where: { Id: Number(id) },
         });
         res.status(200).json({ data: admission, message: "Admission deleted successfully" });
     } catch (error) {
@@ -43,17 +48,16 @@ router.delete("/admission/delete", async (req, res) => {
 router.put("/admission/update", async (req, res) => {
     try {
         const { id, ApplicationNo, StudentId, ClassId, AcademicYear, AdmissionDate, Status } = req.body;
-        const data: any = {};
-        if (ApplicationNo) data.ApplicationNo = ApplicationNo;
-        if (StudentId) data.StudentId = StudentId;
-        if (ClassId) data.ClassId = ClassId;
-        if (AcademicYear) data.AcademicYear = AcademicYear;
-        if (AdmissionDate) data.AdmissionDate = new Date(AdmissionDate);
-        if (Status) data.Status = Status;
-
         const admission = await prisma.admission.update({
-            where: { Id: id },
-            data,
+            where: { Id: Number(id) },
+            data: {
+                ApplicationNo,
+                StudentId: StudentId ? Number(StudentId) : undefined,
+                ClassId: ClassId ? Number(ClassId) : undefined,
+                AcademicYear,
+                AdmissionDate: AdmissionDate ? new Date(AdmissionDate) : undefined,
+                Status,
+            },
         });
         res.status(200).json({ data: admission, message: "Admission updated successfully" });
     } catch (error) {
@@ -65,7 +69,7 @@ router.get("/admission/getById/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const admission = await prisma.admission.findUnique({
-            where: { Id: id },
+            where: { Id: Number(id) },
             include: { Student: true, Class: true },
         });
         res.status(200).json({ data: admission, message: "Admission fetched successfully" });

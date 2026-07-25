@@ -1,0 +1,194 @@
+<div class="user-management-container">
+
+  <!-- PrimeNG Confirm Dialog -->
+  <p-confirmDialog header="Confirm Action" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+  <!-- Page Header Bar -->
+  <div class="page-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <i class="pi pi-clipboard-list"></i>
+      </div>
+      <div>
+        <h2 class="header-title">Exams & Results</h2>
+        <p class="header-subtitle">Schedule school exams and record grade performance results for students</p>
+      </div>
+    </div>
+
+    <!-- Switch tabs and header action buttons -->
+    <div class="flex items-center gap-2">
+      <div class="p-selectbutton-custom mr-3">
+        <button pButton type="button" label="Exam Schedules" 
+          [class]="activeTab === 'exams' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+          (click)="switchTab('exams')"></button>
+        <button pButton type="button" label="Student Results" 
+          [class]="activeTab === 'results' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+          (click)="switchTab('results')"></button>
+      </div>
+
+      <button pButton type="button" [label]="activeTab === 'exams' ? 'Add Exam' : 'Record Marks'" icon="pi pi-plus" 
+        class="p-button-indigo btn-add-user" (click)="activeTab === 'exams' ? onAddExam() : onAddResult()">
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Card wrapper -->
+  <div class="card p-card-custom">
+
+    <!-- Tab 1: Exam Definition list -->
+    <div *ngIf="activeTab === 'exams'">
+      <p-table #dtExams [value]="exams" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
+        [loading]="isLoadingExams" [globalFilterFields]="['Title', 'Term', 'AcademicYear']"
+        styleClass="p-datatable-striped custom-user-table">
+
+        <ng-template pTemplate="caption">
+          <div class="caption-flex">
+            <div class="search-input-box">
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dtExams.filterGlobal($any($event.target).value, 'contains')"
+                  placeholder="Search by exam title, term, academic year..." class="w-full" />
+              </span>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="Title">Exam Title <p-sortIcon field="Title"></p-sortIcon></th>
+            <th pSortableColumn="Term">Term / Semester <p-sortIcon field="Term"></p-sortIcon></th>
+            <th pSortableColumn="AcademicYear">Academic Year <p-sortIcon field="AcademicYear"></p-sortIcon></th>
+            <th pSortableColumn="StartDate">Start Date <p-sortIcon field="StartDate"></p-sortIcon></th>
+            <th pSortableColumn="EndDate">End Date <p-sortIcon field="EndDate"></p-sortIcon></th>
+            <th class="text-right">Action</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-ex>
+          <tr>
+            <td>
+              <span class="user-name-text">{{ ex.Title }}</span>
+            </td>
+            <td>
+              <span class="text-sub font-semibold">{{ ex.Term }}</span>
+            </td>
+            <td>
+              <p-tag [value]="ex.AcademicYear" severity="info"></p-tag>
+            </td>
+            <td>
+              <span class="text-sub font-mono">{{ (ex.StartDate | date:'yyyy-MM-dd') || 'N/A' }}</span>
+            </td>
+            <td>
+              <span class="text-sub font-mono">{{ (ex.EndDate | date:'yyyy-MM-dd') || 'N/A' }}</span>
+            </td>
+            <td class="text-right">
+              <button pButton type="button" icon="pi pi-pencil" title="Edit Exam"
+                class="p-button-success p-button-outlined p-button-sm action-btn m-1" (click)="onEditExam(ex)">
+              </button>
+              <button pButton type="button" icon="pi pi-trash" title="Delete Exam"
+                class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteExam(ex.Id)">
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div class="empty-box">
+                <i class="pi pi-folder-open"></i>
+                <p>No exam schedules found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+
+    <!-- Tab 2: Exam Results list -->
+    <div *ngIf="activeTab === 'results'">
+      <p-table #dtResults [value]="results" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
+        [loading]="isLoadingResults" [globalFilterFields]="['Exam.Title', 'Student.Name', 'Subject.Name', 'Grade']"
+        styleClass="p-datatable-striped custom-user-table">
+
+        <ng-template pTemplate="caption">
+          <div class="caption-flex">
+            <div class="search-input-box">
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dtResults.filterGlobal($any($event.target).value, 'contains')"
+                  placeholder="Search by student name, subject, exam title, grade..." class="w-full" />
+              </span>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="Exam.Title">Exam <p-sortIcon field="Exam.Title"></p-sortIcon></th>
+            <th pSortableColumn="Student.Name">Student <p-sortIcon field="Student.Name"></p-sortIcon></th>
+            <th pSortableColumn="Subject.Name">Subject <p-sortIcon field="Subject.Name"></p-sortIcon></th>
+            <th pSortableColumn="MarksObtained">Score <p-sortIcon field="MarksObtained"></p-sortIcon></th>
+            <th pSortableColumn="Grade">Grade <p-sortIcon field="Grade"></p-sortIcon></th>
+            <th pSortableColumn="Remarks">Remarks <p-sortIcon field="Remarks"></p-sortIcon></th>
+            <th class="text-right">Action</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-res>
+          <tr>
+            <td>
+              <span class="user-name-text">{{ res?.Exam?.Title }}</span>
+            </td>
+            <td>
+              <div class="user-name-cell">
+                <div class="user-avatar">
+                  {{ (res?.Student?.Name || 'S')[0] | uppercase }}
+                </div>
+                <div class="user-details-col">
+                  <span class="user-name-text">{{ res?.Student?.Name }}</span>
+                  <span class="text-muted-sub" *ngIf="res?.Student?.Email">{{ res?.Student?.Email }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="text-sub">{{ res?.Subject?.Name }} ({{ res?.Subject?.Code }})</span>
+            </td>
+            <td>
+              <span class="text-sub font-semibold">{{ res?.MarksObtained }} / {{ res?.TotalMarks }}</span>
+            </td>
+            <td>
+              <p-tag [value]="res?.Grade || 'N/A'" [severity]="getGradeSeverity(res?.Grade)"></p-tag>
+            </td>
+            <td>
+              <span class="text-sub">{{ res?.Remarks || 'N/A' }}</span>
+            </td>
+            <td class="text-right">
+              <button pButton type="button" icon="pi pi-pencil" title="Edit Marks"
+                class="p-button-success p-button-outlined p-button-sm action-btn m-1" (click)="onEditResult(res)">
+              </button>
+              <button pButton type="button" icon="pi pi-trash" title="Delete Entry"
+                class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteResult(res.Id)">
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="empty-state">
+              <div class="empty-box">
+                <i class="pi pi-folder-open"></i>
+                <p>No student marks recorded yet</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+
+  </div>
+
+</div>

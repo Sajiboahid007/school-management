@@ -1,0 +1,108 @@
+<div class="user-modal-wrapper">
+
+  <!-- Header Banner -->
+  <div class="modal-banner">
+    <div class="banner-avatar">
+      <i class="pi" [ngClass]="isEdit ? 'pi-user-edit' : 'pi-user-plus'"></i>
+    </div>
+    <div class="banner-content">
+      <h3 class="banner-title">{{ isEdit ? 'Edit Class Details' : 'Create New Class' }}</h3>
+      <p class="banner-subtitle">
+        {{ isEdit ? 'Modify class names, sections, room numbers, capacities, or class teachers.' : 'Fill in class details to register a new grade or batch section.' }}
+      </p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Class Name -->
+      <div class="form-group col-6">
+        <label for="className" class="form-label">
+          Class Name <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-building input-icon"></i>
+          <input id="className" type="text" pInputText [(ngModel)]="formData.Name" name="Name"
+            placeholder="e.g. Class 10" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Section -->
+      <div class="form-group col-6">
+        <label for="classSection" class="form-label">
+          Section <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-compass input-icon"></i>
+          <input id="classSection" type="text" pInputText [(ngModel)]="formData.Section" name="Section"
+            placeholder="e.g. Section A" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Room Number -->
+      <div class="form-group col-6">
+        <label for="roomNumber" class="form-label">Room Number</label>
+        <div class="input-with-icon">
+          <i class="pi pi-map input-icon"></i>
+          <input id="roomNumber" type="text" pInputText [(ngModel)]="formData.RoomNumber" name="RoomNumber"
+            placeholder="e.g. Room 204" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Capacity -->
+      <div class="form-group col-6">
+        <label for="capacity" class="form-label">Student Capacity</label>
+        <div class="input-with-icon">
+          <i class="pi pi-users input-icon"></i>
+          <input id="capacity" type="number" pInputText [(ngModel)]="formData.Capacity" name="Capacity"
+            placeholder="e.g. 40" class="w-full custom-input" min="1" />
+        </div>
+      </div>
+
+      <!-- Class Teacher -->
+      <div class="form-group col-12">
+        <label for="classTeacher" class="form-label">Assigned Class Teacher</label>
+        <div class="input-with-icon">
+          <i class="pi pi-user input-icon"></i>
+          <p-select id="classTeacher" [options]="teacherOptions" [(ngModel)]="formData.ClassTeacherId" name="ClassTeacherId"
+            optionLabel="label" optionValue="value" placeholder="Select Class Teacher" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Create Class'"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

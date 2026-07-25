@@ -1,0 +1,39 @@
+.table-caption-container {
+  padding: 0.25rem 0;
+}
+
+.search-input-wrapper {
+  position: relative;
+  min-width: 260px;
+
+  .p-input-icon-left {
+    position: relative;
+    display: block;
+    width: 100%;
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .caption-search-input {
+      width: 100%;
+      padding: 0.55rem 1rem 0.55rem 2.4rem;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.875rem;
+      color: #0f172a;
+      transition: all 0.2s ease;
+
+      &:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      }
+    }
+  }
+}

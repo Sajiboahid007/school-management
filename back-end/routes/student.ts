@@ -29,9 +29,9 @@ router.post("/student/add", async (req, res) => {
                 Address,
                 Gender,
                 DateOfBirth: DateOfBirth ? new Date(DateOfBirth) : null,
-                ClassId,
-                DepartmentId,
-                RoleId,
+                ClassId: ClassId ? Number(ClassId) : null,
+                DepartmentId: DepartmentId ? Number(DepartmentId) : null,
+                RoleId: RoleId ? Number(RoleId) : null,
             },
         });
         res.status(201).json({ data: student, message: "Student created successfully" });
@@ -40,21 +40,31 @@ router.post("/student/add", async (req, res) => {
     }
 });
 
-router.delete("/student/delete", async (req, res) => {
+router.delete(["/student/delete", "/student/delete/:id"], async (req, res) => {
     try {
-        const { id } = req.body;
+        const id = req.params.id || req.body.id || req.body.Id;
+        const studentId = Number(id);
+        if (!id || isNaN(studentId)) {
+            return res.status(400).json({ error: "Invalid or missing student ID" });
+        }
         const student = await prisma.student.delete({
-            where: { Id: id },
+            where: { Id: studentId },
         });
         res.status(200).json({ data: student, message: "Student deleted successfully" });
-    } catch (error) {
-        res.status(400).json({ error: "Failed to delete student" });
+    } catch (error: any) {
+        console.error("Error deleting student:", error);
+        res.status(400).json({ error: error?.message || "Failed to delete student" });
     }
 });
 
-router.put("/student/update", async (req, res) => {
+router.put(["/student/update", "/student/update/:id"], async (req, res) => {
     try {
-        const { id, RollNumber, Name, Email, Password, Phone, Address, Gender, DateOfBirth, ClassId, DepartmentId, RoleId } = req.body;
+        const id = req.params.id || req.body.id || req.body.Id;
+        const studentId = Number(id);
+        if (!id || isNaN(studentId)) {
+            return res.status(400).json({ error: "Invalid or missing student ID" });
+        }
+        const { RollNumber, Name, Email, Password, Phone, Address, Gender, DateOfBirth, ClassId, DepartmentId, RoleId } = req.body;
         const updateData: any = {
             RollNumber,
             Name,
@@ -63,20 +73,21 @@ router.put("/student/update", async (req, res) => {
             Address,
             Gender,
             DateOfBirth: DateOfBirth ? new Date(DateOfBirth) : undefined,
-            ClassId,
-            DepartmentId,
-            RoleId,
+            ClassId: ClassId ? Number(ClassId) : undefined,
+            DepartmentId: DepartmentId ? Number(DepartmentId) : undefined,
+            RoleId: RoleId ? Number(RoleId) : undefined,
         };
         if (Password) {
             updateData.Password = await bcrypt.hash(Password, 10);
         }
         const student = await prisma.student.update({
-            where: { Id: id },
+            where: { Id: studentId },
             data: updateData,
         });
         res.status(200).json({ data: student, message: "Student updated successfully" });
-    } catch (error) {
-        res.status(400).json({ error: "Failed to update student" });
+    } catch (error: any) {
+        console.error("Error updating student:", error);
+        res.status(400).json({ error: error?.message || "Failed to update student" });
     }
 });
 
@@ -84,7 +95,7 @@ router.get("/student/getById/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const student = await prisma.student.findUnique({
-            where: { Id: id },
+            where: { Id: Number(id) },
             include: {
                 Class: true,
                 Department: true,

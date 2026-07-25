@@ -17,53 +17,71 @@ router.get("/class/get", async (req, res) => {
 router.post("/class/add", async (req, res) => {
     try {
         const { Name, Section, RoomNumber, Capacity, ClassTeacherId } = req.body;
-        const newClass = await prisma.class.create({
-            data: { Name, Section, RoomNumber, Capacity, ClassTeacherId },
+        const cls = await prisma.class.create({
+            data: {
+                Name,
+                Section,
+                RoomNumber,
+                Capacity: Capacity ? Number(Capacity) : undefined,
+                ClassTeacherId: ClassTeacherId ? Number(ClassTeacherId) : null,
+            },
         });
-        res.status(201).json({ data: newClass, message: "Class created successfully" });
+        res.status(201).json({ data: cls, message: "Class created successfully" });
     } catch (error) {
         res.status(400).json({ error: "Failed to create class" });
     }
 });
 
-router.delete("/class/delete", async (req, res) => {
+router.delete(["/class/delete", "/class/delete/:id"], async (req, res) => {
     try {
-        const { id } = req.body;
-        const deletedClass = await prisma.class.delete({
-            where: { Id: id },
+        const id = req.params.id || req.body.id || req.body.Id;
+        const classId = Number(id);
+        if (!id || isNaN(classId)) {
+            return res.status(400).json({ error: "Invalid or missing class ID" });
+        }
+        const cls = await prisma.class.delete({
+            where: { Id: classId },
         });
-        res.status(200).json({ data: deletedClass, message: "Class deleted successfully" });
-    } catch (error) {
-        res.status(400).json({ error: "Failed to delete class" });
+        res.status(200).json({ data: cls, message: "Class deleted successfully" });
+    } catch (error: any) {
+        console.error("Error deleting class:", error);
+        res.status(400).json({ error: error?.message || "Failed to delete class" });
     }
 });
 
-router.put("/class/update", async (req, res) => {
+router.put(["/class/update", "/class/update/:id"], async (req, res) => {
     try {
-        const { id, Name, Section, RoomNumber, Capacity, ClassTeacherId } = req.body;
-        const updatedClass = await prisma.class.update({
-            where: { Id: id },
-            data: { Name, Section, RoomNumber, Capacity, ClassTeacherId },
+        const id = req.params.id || req.body.id || req.body.Id;
+        const classId = Number(id);
+        if (!id || isNaN(classId)) {
+            return res.status(400).json({ error: "Invalid or missing class ID" });
+        }
+        const { Name, Section, RoomNumber, Capacity, ClassTeacherId } = req.body;
+        const cls = await prisma.class.update({
+            where: { Id: classId },
+            data: {
+                Name,
+                Section,
+                RoomNumber,
+                Capacity: Capacity ? Number(Capacity) : undefined,
+                ClassTeacherId: ClassTeacherId ? Number(ClassTeacherId) : null,
+            },
         });
-        res.status(200).json({ data: updatedClass, message: "Class updated successfully" });
-    } catch (error) {
-        res.status(400).json({ error: "Failed to update class" });
+        res.status(200).json({ data: cls, message: "Class updated successfully" });
+    } catch (error: any) {
+        console.error("Error updating class:", error);
+        res.status(400).json({ error: error?.message || "Failed to update class" });
     }
 });
 
 router.get("/class/getById/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const singleClass = await prisma.class.findUnique({
-            where: { Id: id },
-            include: {
-                ClassTeacher: true,
-                Students: true,
-                Subjects: true,
-                Schedules: true,
-            },
+        const cls = await prisma.class.findUnique({
+            where: { Id: Number(id) },
+            include: { ClassTeacher: true, Students: true, Subjects: true, Schedules: true },
         });
-        res.status(200).json({ data: singleClass, message: "Class fetched successfully" });
+        res.status(200).json({ data: cls, message: "Class fetched successfully" });
     } catch (error) {
         res.status(400).json({ error: "Failed to fetch class" });
     }

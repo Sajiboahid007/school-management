@@ -1,0 +1,105 @@
+<div class="user-management-container">
+
+  <!-- PrimeNG Confirm Dialog -->
+  <p-confirmDialog header="Confirm Action" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+  <!-- Page Header Bar -->
+  <div class="page-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <i class="pi pi-sitemap"></i>
+      </div>
+      <div>
+        <h2 class="header-title">Department Management</h2>
+        <p class="header-subtitle">Define and manage academic streams, department codes, and assign HoDs</p>
+      </div>
+    </div>
+
+    <!-- Top Add Dept Button -->
+    <button pButton type="button" label="Add Department" icon="pi pi-plus" class="p-button-indigo btn-add-user"
+      (click)="onAddDepartment()">
+    </button>
+  </div>
+
+  <!-- Main Department Table Card -->
+  <div class="card p-card-custom">
+    <p-table #dt [value]="departments" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50, 100]" [paginator]="true"
+      [loading]="isLoading" [globalFilterFields]="['Name', 'Code', 'Description', 'HeadTeacher.Name']"
+      styleClass="p-datatable-striped custom-user-table">
+
+      <!-- CAPTION: Search & Global Filter -->
+      <ng-template pTemplate="caption">
+        <div class="caption-flex">
+          <div class="search-input-box">
+            <span class="p-input-icon-left w-full">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Search by department name, code, head teacher..." class="w-full" />
+            </span>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- TABLE HEADER -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="Code">Code <p-sortIcon field="Code"></p-sortIcon></th>
+          <th pSortableColumn="Name">Department Name <p-sortIcon field="Name"></p-sortIcon></th>
+          <th pSortableColumn="HeadTeacher.Name">Head of Department (HoD) <p-sortIcon field="HeadTeacher.Name"></p-sortIcon></th>
+          <th pSortableColumn="Description">Description <p-sortIcon field="Description"></p-sortIcon></th>
+          <th class="text-right">Action</th>
+        </tr>
+      </ng-template>
+
+      <!-- TABLE BODY -->
+      <ng-template pTemplate="body" let-dept>
+        <tr>
+          <td>
+            <span class="text-sub font-mono font-semibold">{{ dept?.Code }}</span>
+          </td>
+          <td>
+            <span class="user-name-text">{{ dept?.Name }}</span>
+          </td>
+          <td>
+            <div class="user-name-cell" *ngIf="dept?.HeadTeacher; else unassigned">
+              <div class="user-avatar">
+                {{ (dept?.HeadTeacher?.Name || 'H')[0] | uppercase }}
+              </div>
+              <div class="user-details-col">
+                <span class="user-name-text">{{ dept?.HeadTeacher?.Name }}</span>
+                <span class="text-muted-sub" *ngIf="dept?.HeadTeacher?.Email">{{ dept?.HeadTeacher?.Email }}</span>
+              </div>
+            </div>
+            <ng-template #unassigned>
+              <p-tag value="Unassigned" severity="secondary"></p-tag>
+            </ng-template>
+          </td>
+          <td>
+            <span class="text-sub">{{ dept?.Description || 'N/A' }}</span>
+          </td>
+          <td class="text-right">
+            <button pButton type="button" icon="pi pi-pencil" title="Edit Department"
+              class="p-button-success p-button-outlined p-button-sm action-btn m-1" (click)="onEditDepartment(dept.Id)">
+            </button>
+            <button pButton type="button" icon="pi pi-trash" title="Delete Department"
+              class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteDepartment(dept.Id)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- EMPTY STATE -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="empty-state">
+            <div class="empty-box">
+              <i class="pi pi-folder-open"></i>
+              <p>No department records found</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>

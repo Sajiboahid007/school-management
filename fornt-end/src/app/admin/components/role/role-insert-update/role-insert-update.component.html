@@ -1,0 +1,74 @@
+<div class="user-modal-wrapper">
+
+  <!-- Header Banner -->
+  <div class="modal-banner">
+    <div class="banner-avatar">
+      <i class="pi" [ngClass]="isEdit ? 'pi-file-edit' : 'pi-plus-circle'"></i>
+    </div>
+    <div class="banner-content">
+      <h3 class="banner-title">{{ isEdit ? 'Edit System Role' : 'Create New Role' }}</h3>
+      <p class="banner-subtitle">
+        {{ isEdit ? 'Modify role title and permission descriptions.' : 'Define a new role name and description for system access.' }}
+      </p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Role Name -->
+      <div class="form-group col-12">
+        <label for="roleName" class="form-label">
+          Role Name <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-shield input-icon"></i>
+          <input id="roleName" type="text" pInputText [(ngModel)]="formData.Name" name="Name"
+            placeholder="e.g. Teacher, Moderator, Accountant" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group col-12">
+        <label for="roleDescription" class="form-label">Description</label>
+        <div class="input-with-icon">
+          <i class="pi pi-align-left input-icon"></i>
+          <input id="roleDescription" type="text" pInputText [(ngModel)]="formData.Description" name="Description"
+            placeholder="Brief overview of role access level..." class="w-full custom-input" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Create Role'"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

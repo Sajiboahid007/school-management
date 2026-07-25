@@ -1,0 +1,211 @@
+/* Welcome Header Banner */
+.welcome-header-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+
+  .welcome-text {
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 0.25rem;
+    }
+    p {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin: 0;
+    }
+  }
+
+  .welcome-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+
+    @media (max-width: 640px) {
+      display: none;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    }
+  }
+}
+
+/* Stats Cards 5-Column Grid */
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+  }
+
+  .stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    &.icon-indigo { background: #eef2ff; svg { fill: #4f46e5; } }
+    &.icon-emerald { background: #ecfdf5; svg { fill: #10b981; } }
+    &.icon-rose { background: #fff1f2; svg { fill: #f43f5e; } }
+    &.icon-amber { background: #fffbeb; svg { fill: #f59e0b; } }
+    &.icon-blue { background: #eff6ff; svg { fill: #3b82f6; } }
+  }
+
+  .stat-info {
+    flex: 1;
+
+    .stat-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #64748b;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-trend {
+      font-size: 0.725rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+
+      &.trend-neutral { color: #4f46e5; }
+
+      .trend-sub {
+        color: #94a3b8;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+/* Shortcuts Panel */
+.content-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    .panel-tag {
+      font-size: 0.725rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #64748b;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+    }
+  }
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+
+  .shortcut-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.6rem;
+    padding: 1.1rem 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #334155;
+    font-size: 0.825rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    .shortcut-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg { width: 20px; height: 20px; }
+
+      &.icon-indigo { background: #eef2ff; svg { fill: #4f46e5; } }
+      &.icon-amber { background: #fffbeb; svg { fill: #f59e0b; } }
+      &.icon-emerald { background: #ecfdf5; svg { fill: #10b981; } }
+      &.icon-blue { background: #eff6ff; svg { fill: #3b82f6; } }
+    }
+
+    &:hover {
+      background: #ffffff;
+      border-color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+      color: #4f46e5;
+    }
+  }
+}

@@ -1,0 +1,113 @@
+<div class="user-modal-wrapper">
+
+  <!-- Header Banner -->
+  <div class="modal-banner">
+    <div class="banner-avatar">
+      <i class="pi" [ngClass]="isEdit ? 'pi-user-edit' : 'pi-user-plus'"></i>
+    </div>
+    <div class="banner-content">
+      <h3 class="banner-title">{{ isEdit ? 'Edit User Profile' : 'Create New User Account' }}</h3>
+      <p class="banner-subtitle">
+        {{ isEdit ? 'Modify user information, credentials, or assigned access level.' : 'Fill in user details to grant
+        access to the EduManager portal.' }}
+      </p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Full Name -->
+      <div class="form-group col-12">
+        <label for="userName" class="form-label">
+          Full Name <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-user input-icon"></i>
+          <input id="userName" type="text" pInputText [(ngModel)]="formData.Name" name="Name"
+            placeholder="e.g. Alex Morgan" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Email Address -->
+      <div class="form-group col-12">
+        <label for="userEmail" class="form-label">
+          Email Address <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-envelope input-icon"></i>
+          <input id="userEmail" type="email" pInputText [(ngModel)]="formData.Email" name="Email"
+            placeholder="alex.morgan@school.edu" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Phone Number -->
+      <div class="form-group col-6">
+        <label for="userPhone" class="form-label">Phone Number</label>
+        <div class="input-with-icon">
+          <i class="pi pi-phone input-icon"></i>
+          <input id="userPhone" type="tel" pInputText [(ngModel)]="formData.Phone" name="Phone"
+            placeholder="01700000000" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Assigned Role -->
+      <div class="form-group col-6">
+        <label for="userRole" class="form-label">Assigned Role</label>
+        <div class="input-with-icon">
+          <i class="pi pi-shield input-icon"></i>
+          <p-select id="userRole" [options]="roleOptions" [(ngModel)]="formData.RoleId" name="RoleId"
+            optionLabel="label" optionValue="value" placeholder="Select Role" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group col-12">
+        <label for="userPassword" class="form-label">
+          Password
+          <span class="required-star" *ngIf="!isEdit">*</span>
+          <span class="muted-hint" *ngIf="isEdit">(Leave blank to keep existing password)</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-lock input-icon"></i>
+          <input id="userPassword" type="password" pInputText [(ngModel)]="formData.Password" name="Password"
+            placeholder="••••••••••••" class="w-full custom-input" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Create User'"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -1,0 +1,166 @@
+<div class="user-modal-wrapper">
+
+  <!-- Header Banner -->
+  <div class="modal-banner">
+    <div class="banner-avatar">
+      <i class="pi" [ngClass]="isEdit ? 'pi-user-edit' : 'pi-user-plus'"></i>
+    </div>
+    <div class="banner-content">
+      <h3 class="banner-title">{{ isEdit ? 'Edit Student Profile' : 'Register New Student' }}</h3>
+      <p class="banner-subtitle">
+        {{ isEdit ? 'Modify student info, class assignment, department, or roll number.' : 'Fill in student details to enroll them into the portal.' }}
+      </p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Roll Number -->
+      <div class="form-group col-6">
+        <label for="rollNumber" class="form-label">Roll Number</label>
+        <div class="input-with-icon">
+          <i class="pi pi-id-card input-icon"></i>
+          <input id="rollNumber" type="text" pInputText [(ngModel)]="formData.RollNumber" name="RollNumber"
+            placeholder="e.g. STU-1001" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Full Name -->
+      <div class="form-group col-6">
+        <label for="studentName" class="form-label">
+          Full Name <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-user input-icon"></i>
+          <input id="studentName" type="text" pInputText [(ngModel)]="formData.Name" name="Name"
+            placeholder="e.g. Sarah Jenkins" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Email Address -->
+      <div class="form-group col-6">
+        <label for="studentEmail" class="form-label">
+          Email Address <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-envelope input-icon"></i>
+          <input id="studentEmail" type="email" pInputText [(ngModel)]="formData.Email" name="Email"
+            placeholder="sarah.j@school.edu" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Phone Number -->
+      <div class="form-group col-6">
+        <label for="studentPhone" class="form-label">Phone Number</label>
+        <div class="input-with-icon">
+          <i class="pi pi-phone input-icon"></i>
+          <input id="studentPhone" type="tel" pInputText [(ngModel)]="formData.Phone" name="Phone"
+            placeholder="01700000000" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Class -->
+      <div class="form-group col-6">
+        <label for="studentClass" class="form-label">Class</label>
+        <div class="input-with-icon">
+          <i class="pi pi-building input-icon"></i>
+          <p-select id="studentClass" [options]="classOptions" [(ngModel)]="formData.ClassId" name="ClassId"
+            optionLabel="label" optionValue="value" placeholder="Select Class" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Department -->
+      <div class="form-group col-6">
+        <label for="studentDept" class="form-label">Department / Stream</label>
+        <div class="input-with-icon">
+          <i class="pi pi-sitemap input-icon"></i>
+          <p-select id="studentDept" [options]="departmentOptions" [(ngModel)]="formData.DepartmentId" name="DepartmentId"
+            optionLabel="label" optionValue="value" placeholder="Select Department" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Gender -->
+      <div class="form-group col-6">
+        <label for="studentGender" class="form-label">Gender</label>
+        <div class="input-with-icon">
+          <i class="pi pi-users input-icon"></i>
+          <p-select id="studentGender" [options]="genderOptions" [(ngModel)]="formData.Gender" name="Gender"
+            optionLabel="label" optionValue="value" placeholder="Select Gender" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="form-group col-6">
+        <label for="studentDob" class="form-label">Date of Birth</label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar input-icon"></i>
+          <input id="studentDob" type="date" pInputText [(ngModel)]="formData.DateOfBirth" name="DateOfBirth"
+            class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group col-12">
+        <label for="studentAddress" class="form-label">Address</label>
+        <div class="input-with-icon">
+          <i class="pi pi-map-marker input-icon"></i>
+          <input id="studentAddress" type="text" pInputText [(ngModel)]="formData.Address" name="Address"
+            placeholder="House, Street, City" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group col-12">
+        <label for="studentPassword" class="form-label">
+          Password
+          <span class="required-star" *ngIf="!isEdit">*</span>
+          <span class="muted-hint" *ngIf="isEdit">(Leave blank to keep existing password)</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-lock input-icon"></i>
+          <input id="studentPassword" type="password" pInputText [(ngModel)]="formData.Password" name="Password"
+            placeholder="••••••••••••" class="w-full custom-input" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Create Student'"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

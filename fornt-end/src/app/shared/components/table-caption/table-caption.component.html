@@ -1,1 +1,13 @@
-<p>table-caption works!</p>
+<div class="table-caption-container flex align-items-center justify-content-between gap-3 w-full">
+  <div class="search-input-wrapper">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search search-icon"></i>
+      <input 
+        pInputText 
+        type="text" 
+        (input)="table?.filterGlobal($any($event.target).value, 'contains')" 
+        placeholder="Global Search users..." 
+        class="caption-search-input" />
+    </span>
+  </div>
+</div>

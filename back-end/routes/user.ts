@@ -20,7 +20,13 @@ router.post("/user/add", async (req, res) => {
         const { Name, Email, Password, Phone, RoleId } = req.body;
         const hashedPassword = await bcrypt.hash(Password, 10);
         const user = await prisma.user.create({
-            data: { Name, Email, Password: hashedPassword, Phone, RoleId },
+            data: {
+                Name,
+                Email,
+                Password: hashedPassword,
+                Phone,
+                RoleId: RoleId ? Number(RoleId) : null,
+            },
         });
         res.status(201).json({ data: user, message: "User created successfully" });
     } catch (error) {
@@ -32,7 +38,7 @@ router.delete("/user/delete", async (req, res) => {
     try {
         const { id } = req.body;
         const user = await prisma.user.delete({
-            where: { Id: id },
+            where: { Id: Number(id) },
         });
         res.status(200).json({ data: user, message: "User deleted successfully" });
     } catch (error) {
@@ -43,12 +49,17 @@ router.delete("/user/delete", async (req, res) => {
 router.put("/user/update", async (req, res) => {
     try {
         const { id, Name, Email, Password, Phone, RoleId } = req.body;
-        const updateData: any = { Name, Email, Phone, RoleId };
+        const updateData: any = {
+            Name,
+            Email,
+            Phone,
+            RoleId: RoleId ? Number(RoleId) : undefined,
+        };
         if (Password) {
             updateData.Password = await bcrypt.hash(Password, 10);
         }
         const user = await prisma.user.update({
-            where: { Id: id },
+            where: { Id: Number(id) },
             data: updateData,
         });
         res.status(200).json({ data: user, message: "User updated successfully" });
@@ -61,7 +72,7 @@ router.get("/user/getById/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const user = await prisma.user.findUnique({
-            where: { Id: id },
+            where: { Id: Number(id) },
             include: { Role: true },
         });
         res.status(200).json({ data: user, message: "User fetched successfully" });

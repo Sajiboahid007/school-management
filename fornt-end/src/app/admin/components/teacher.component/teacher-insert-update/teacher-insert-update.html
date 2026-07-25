@@ -1,0 +1,166 @@
+<div class="user-modal-wrapper">
+
+  <!-- Header Banner -->
+  <div class="modal-banner">
+    <div class="banner-avatar">
+      <i class="pi" [ngClass]="isEdit ? 'pi-user-edit' : 'pi-user-plus'"></i>
+    </div>
+    <div class="banner-content">
+      <h3 class="banner-title">{{ isEdit ? 'Edit Teacher Profile' : 'Register New Teacher' }}</h3>
+      <p class="banner-subtitle">
+        {{ isEdit ? 'Modify teacher qualifications, department assignments, and contact details.' : 'Fill in teacher details to onboard them into the portal.' }}
+      </p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Full Name -->
+      <div class="form-group col-6">
+        <label for="teacherName" class="form-label">
+          Full Name <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-user input-icon"></i>
+          <input id="teacherName" type="text" pInputText [(ngModel)]="formData.Name" name="Name"
+            placeholder="e.g. Prof. Alan Turing" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Email Address -->
+      <div class="form-group col-6">
+        <label for="teacherEmail" class="form-label">
+          Email Address <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-envelope input-icon"></i>
+          <input id="teacherEmail" type="email" pInputText [(ngModel)]="formData.Email" name="Email"
+            placeholder="alan.turing@school.edu" class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Phone Number -->
+      <div class="form-group col-6">
+        <label for="teacherPhone" class="form-label">Phone Number</label>
+        <div class="input-with-icon">
+          <i class="pi pi-phone input-icon"></i>
+          <input id="teacherPhone" type="tel" pInputText [(ngModel)]="formData.Phone" name="Phone"
+            placeholder="01700000000" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Qualification -->
+      <div class="form-group col-6">
+        <label for="teacherQual" class="form-label">Qualification</label>
+        <div class="input-with-icon">
+          <i class="pi pi-briefcase input-icon"></i>
+          <input id="teacherQual" type="text" pInputText [(ngModel)]="formData.Qualification" name="Qualification"
+            placeholder="e.g. Ph.D. in Computer Science" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Department -->
+      <div class="form-group col-6">
+        <label for="teacherDept" class="form-label">Department</label>
+        <div class="input-with-icon">
+          <i class="pi pi-sitemap input-icon"></i>
+          <p-select id="teacherDept" [options]="departmentOptions" [(ngModel)]="formData.DepartmentId" name="DepartmentId"
+            optionLabel="label" optionValue="value" placeholder="Select Department" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Role -->
+      <div class="form-group col-6">
+        <label for="teacherRole" class="form-label">System Role</label>
+        <div class="input-with-icon">
+          <i class="pi pi-shield input-icon"></i>
+          <p-select id="teacherRole" [options]="roleOptions" [(ngModel)]="formData.RoleId" name="RoleId"
+            optionLabel="label" optionValue="value" placeholder="Select Role" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Gender -->
+      <div class="form-group col-6">
+        <label for="teacherGender" class="form-label">Gender</label>
+        <div class="input-with-icon">
+          <i class="pi pi-users input-icon"></i>
+          <p-select id="teacherGender" [options]="genderOptions" [(ngModel)]="formData.Gender" name="Gender"
+            optionLabel="label" optionValue="value" placeholder="Select Gender" [showClear]="true"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Joining Date -->
+      <div class="form-group col-6">
+        <label for="joiningDate" class="form-label">Joining Date</label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar input-icon"></i>
+          <input id="joiningDate" type="date" pInputText [(ngModel)]="formData.JoiningDate" name="JoiningDate"
+            class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group col-12">
+        <label for="teacherAddress" class="form-label">Address</label>
+        <div class="input-with-icon">
+          <i class="pi pi-map-marker input-icon"></i>
+          <input id="teacherAddress" type="text" pInputText [(ngModel)]="formData.Address" name="Address"
+            placeholder="House, Street, City" class="w-full custom-input" />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group col-12">
+        <label for="teacherPassword" class="form-label">
+          Password
+          <span class="required-star" *ngIf="!isEdit">*</span>
+          <span class="muted-hint" *ngIf="isEdit">(Leave blank to keep existing password)</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-lock input-icon"></i>
+          <input id="teacherPassword" type="password" pInputText [(ngModel)]="formData.Password" name="Password"
+            placeholder="••••••••••••" class="w-full custom-input" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Create Teacher'"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

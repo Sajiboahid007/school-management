@@ -1,0 +1,124 @@
+<div class="user-modal-wrapper">
+
+  <!-- Compact inline header -->
+  <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem;">
+    <i class="pi pi-user-check" style="font-size:1.1rem;color:#6366f1;"></i>
+    <div>
+      <span style="font-weight:700;font-size:1rem;color:#1e1b4b;">{{ classData?.Name }} ({{ classData?.Section }})</span>
+      <span style="font-size:0.8rem;color:#64748b;margin-left:0.5rem;">— mark each student's attendance below</span>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Alert Banner for Error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="pi pi-exclamation-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Unable to Save</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner for Success -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="pi pi-check-circle alert-icon"></i>
+      <div class="alert-text">
+        <strong class="alert-title">Success!</strong>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Configuration fields (Date & Teacher) -->
+    <div class="form-grid mb-4">
+      <!-- Attendance Date -->
+      <div class="form-group col-6">
+        <label for="attDate" class="form-label">
+          Attendance Date <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-calendar input-icon"></i>
+          <input id="attDate" type="date" pInputText [(ngModel)]="attendanceDate" name="Date"
+            class="w-full custom-input" required />
+        </div>
+      </div>
+
+      <!-- Class Teacher (Recorded By) -->
+      <div class="form-group col-6">
+        <label for="attTeacher" class="form-label">
+          Recorded By (Teacher) <span class="required-star">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="pi pi-user-edit input-icon"></i>
+          <p-select id="attTeacher" [options]="teacherOptions" [(ngModel)]="recordedByTeacherId" name="RecordedByTeacherId"
+            optionLabel="label" optionValue="value" placeholder="Select Teacher"
+            styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Attendance List Table -->
+    <div class="card p-card-custom mb-3" style="max-height: 380px; overflow-y: auto; padding: 0.5rem 1rem;">
+      <h4 class="text-sub font-semibold mb-2" style="font-size: 0.95rem;">Student List</h4>
+      
+      <div *ngIf="isLoading" class="text-center py-4">
+        <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #6366f1;"></i>
+        <p class="text-muted-sub mt-2">Loading student records...</p>
+      </div>
+
+      <div *ngIf="!isLoading && students.length === 0" class="text-center py-4">
+        <i class="pi pi-users text-muted-sub" style="font-size: 2rem;"></i>
+        <p class="text-muted-sub mt-2">No students enrolled in this class.</p>
+      </div>
+
+      <table class="w-full text-left" *ngIf="!isLoading && students.length > 0" style="border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e2e8f0;">
+            <th style="padding: 0.5rem 0.75rem; text-transform:uppercase; font-size:0.72rem; color:#64748b; font-weight:700;">Roll No</th>
+            <th style="padding: 0.5rem 0.75rem; text-transform:uppercase; font-size:0.72rem; color:#64748b; font-weight:700;">Student Name</th>
+            <th style="padding: 0.5rem 0.75rem; text-transform:uppercase; font-size:0.72rem; color:#64748b; font-weight:700; text-align:right; width:160px;">P &nbsp;/&nbsp; A &nbsp;/&nbsp; L</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of students" style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding:0.85rem 0.75rem; font-family:monospace; font-weight:600; font-size:0.85rem; color:#334155;">{{ s.RollNumber }}</td>
+            <td style="padding:0.85rem 0.75rem;">
+              <span style="font-weight:600; font-size:0.95rem; color:#1e293b;">{{ s.Name }}</span>
+            </td>
+            <td style="padding:0.85rem 0.75rem; text-align:right;">
+              <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" pButton label="P"
+                  [class]="s.Status === 'PRESENT' ? 'p-button-success p-button-sm' : 'p-button-outlined p-button-secondary p-button-sm'"
+                  (click)="s.Status = 'PRESENT'"
+                  style="min-width:38px; height:34px; font-weight:800; font-size:0.8rem; border-radius:8px;">
+                </button>
+                <button type="button" pButton label="A"
+                  [class]="s.Status === 'ABSENT' ? 'p-button-danger p-button-sm' : 'p-button-outlined p-button-secondary p-button-sm'"
+                  (click)="s.Status = 'ABSENT'"
+                  style="min-width:38px; height:34px; font-weight:800; font-size:0.8rem; border-radius:8px;">
+                </button>
+                <button type="button" pButton label="L"
+                  [class]="s.Status === 'LATE' ? 'p-button-warn p-button-sm' : 'p-button-outlined p-button-secondary p-button-sm'"
+                  (click)="s.Status = 'LATE'"
+                  style="min-width:38px; height:34px; font-weight:800; font-size:0.8rem; border-radius:8px;">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dialog Actions Footer -->
+    <div class="form-actions">
+      <button type="button" pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
+      </button>
+      <button type="submit" pButton label="Save Attendance" icon="pi pi-check-circle" [loading]="isLoading"
+        class="p-button-indigo btn-submit">
+      </button>
+    </div>
+
+  </form>
+</div>

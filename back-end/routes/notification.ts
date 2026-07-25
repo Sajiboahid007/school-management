@@ -18,7 +18,13 @@ router.post("/notification/add", async (req, res) => {
     try {
         const { UserId, Title, Message, Type, IsRead } = req.body;
         const notification = await prisma.notification.create({
-            data: { UserId, Title, Message, Type, IsRead },
+            data: {
+                UserId: Number(UserId),
+                Title,
+                Message,
+                Type,
+                IsRead: IsRead !== undefined ? IsRead : false,
+            },
         });
         res.status(201).json({ data: notification, message: "Notification created successfully" });
     } catch (error) {
@@ -30,7 +36,7 @@ router.delete("/notification/delete", async (req, res) => {
     try {
         const { id } = req.body;
         const notification = await prisma.notification.delete({
-            where: { Id: id },
+            where: { Id: Number(id) },
         });
         res.status(200).json({ data: notification, message: "Notification deleted successfully" });
     } catch (error) {
@@ -40,10 +46,16 @@ router.delete("/notification/delete", async (req, res) => {
 
 router.put("/notification/update", async (req, res) => {
     try {
-        const { id, Title, Message, Type, IsRead } = req.body;
+        const { id, UserId, Title, Message, Type, IsRead } = req.body;
         const notification = await prisma.notification.update({
-            where: { Id: id },
-            data: { Title, Message, Type, IsRead },
+            where: { Id: Number(id) },
+            data: {
+                UserId: UserId ? Number(UserId) : undefined,
+                Title,
+                Message,
+                Type,
+                IsRead,
+            },
         });
         res.status(200).json({ data: notification, message: "Notification updated successfully" });
     } catch (error) {
@@ -55,7 +67,7 @@ router.get("/notification/getById/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const notification = await prisma.notification.findUnique({
-            where: { Id: id },
+            where: { Id: Number(id) },
             include: { User: true },
         });
         res.status(200).json({ data: notification, message: "Notification fetched successfully" });

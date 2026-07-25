@@ -1,0 +1,281 @@
+<div class="user-management-container">
+
+  <!-- PrimeNG Confirm Dialog -->
+  <p-confirmDialog header="Confirm Action" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+  <!-- Page Header Bar -->
+  <div class="page-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <i class="pi pi-user-check"></i>
+      </div>
+      <div>
+        <h2 class="header-title">Attendance Tracking</h2>
+        <p class="header-subtitle">Record and review student attendance registers by active class groups</p>
+      </div>
+    </div>
+
+    <!-- Toggle tabs (Active Classes / Monthly Report / Log History) -->
+    <div class="p-selectbutton-custom">
+      <button pButton type="button" label="Active Classes" 
+        [class]="activeTab === 'classes' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('classes')"></button>
+      <button pButton type="button" label="Monthly Report Grid" 
+        [class]="activeTab === 'report' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('report')"></button>
+      <button pButton type="button" label="Attendance Log History" 
+        [class]="activeTab === 'history' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('history')"></button>
+    </div>
+  </div>
+
+  <!-- Main Card Container -->
+  <div class="card p-card-custom">
+
+    <!-- TAB 1: ACTIVE CLASSES -->
+    <div *ngIf="activeTab === 'classes'">
+      <p-table #dtClasses [value]="classes" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
+        [loading]="isLoadingClasses" [globalFilterFields]="['Name', 'Section', 'RoomNumber', 'ClassTeacher.Name']"
+        styleClass="p-datatable-striped custom-user-table">
+
+        <!-- Caption Search -->
+        <ng-template pTemplate="caption">
+          <div class="caption-flex">
+            <div class="search-input-box">
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dtClasses.filterGlobal($any($event.target).value, 'contains')"
+                  placeholder="Search classes by name, section, teacher..." class="w-full" />
+              </span>
+            </div>
+          </div>
+        </ng-template>
+
+        <!-- Header -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="Name">Class Name <p-sortIcon field="Name"></p-sortIcon></th>
+            <th pSortableColumn="Section">Section <p-sortIcon field="Section"></p-sortIcon></th>
+            <th pSortableColumn="RoomNumber">Room / Venue <p-sortIcon field="RoomNumber"></p-sortIcon></th>
+            <th pSortableColumn="ClassTeacher.Name">Class Teacher <p-sortIcon field="ClassTeacher.Name"></p-sortIcon></th>
+            <th class="text-right">Action</th>
+          </tr>
+        </ng-template>
+
+        <!-- Body -->
+        <ng-template pTemplate="body" let-cls>
+          <tr>
+            <td>
+              <span class="user-name-text">{{ cls?.Name }}</span>
+            </td>
+            <td>
+              <p-tag [value]="cls?.Section" severity="info"></p-tag>
+            </td>
+            <td>
+              <span class="text-sub font-mono">{{ cls?.RoomNumber || 'N/A' }}</span>
+            </td>
+            <td>
+              <div class="user-name-cell" *ngIf="cls?.ClassTeacher; else unassigned">
+                <div class="user-avatar">
+                  {{ (cls?.ClassTeacher?.Name || 'T')[0] | uppercase }}
+                </div>
+                <div class="user-details-col">
+                  <span class="user-name-text">{{ cls?.ClassTeacher?.Name }}</span>
+                  <span class="text-muted-sub" *ngIf="cls?.ClassTeacher?.Email">{{ cls?.ClassTeacher?.Email }}</span>
+                </div>
+              </div>
+              <ng-template #unassigned>
+                <p-tag value="Unassigned" severity="secondary"></p-tag>
+              </ng-template>
+            </td>
+            <td class="text-right">
+              <button pButton type="button" label="Take Attendance" icon="pi pi-user-check"
+                class="p-button-indigo p-button-sm font-semibold" (click)="onTakeAttendance(cls)"
+                style="border-radius: 8px; padding: 0.4rem 0.9rem;">
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Empty State -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="empty-state">
+              <div class="empty-box">
+                <i class="pi pi-folder-open"></i>
+                <p>No class records found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+
+    <!-- TAB 2: MONTHLY REPORT GRID -->
+    <div *ngIf="activeTab === 'report'">
+      <!-- Configuration Filter Ribbon -->
+      <div class="filter-ribbon">
+        <div class="filter-inputs-group">
+          <!-- Class Select -->
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Class:</span>
+            <p-select [options]="classOptions" [(ngModel)]="selectedClassId" (onChange)="onReportParamChange()"
+              placeholder="Select Class" styleClass="w-48" style="width: 170px !important;">
+            </p-select>
+          </div>
+          <!-- Month Select -->
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Month:</span>
+            <p-select [options]="monthOptions" [(ngModel)]="selectedMonth" (onChange)="onReportParamChange()"
+              placeholder="Select Month" styleClass="w-40" style="width: 140px !important;">
+            </p-select>
+          </div>
+          <!-- Year Select -->
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Year:</span>
+            <p-select [options]="yearOptions" [(ngModel)]="selectedYear" (onChange)="onReportParamChange()"
+              placeholder="Select Year" styleClass="w-32" style="width: 110px !important;">
+            </p-select>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="filter-legend">
+          <span class="legend-item"><i class="pi pi-check-circle text-success"></i> Present</span>
+          <span class="legend-item"><i class="pi pi-times-circle text-danger"></i> Absent</span>
+          <span class="legend-item"><i class="pi pi-clock text-warning"></i> Late</span>
+        </div>
+      </div>
+
+      <!-- Report Sheet Grid Table -->
+      <div style="overflow-x: auto;">
+        <p-table [value]="reportData" [loading]="isLoadingReport" styleClass="p-datatable-striped custom-user-table" [scrollable]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="min-width: 110px; z-index: 10;" class="font-bold text-xs">Roll Number</th>
+              <th style="min-width: 180px; z-index: 10;" class="font-bold text-xs">Student Name</th>
+              <th style="min-width: 60px;" class="font-bold text-xs text-center">P</th>
+              <th style="min-width: 60px;" class="font-bold text-xs text-center">A</th>
+              <th style="min-width: 60px;" class="font-bold text-xs text-center">L</th>
+              <th style="min-width: 70px;" class="font-bold text-xs text-center">Rate %</th>
+              <th *ngFor="let day of daysInMonth" style="min-width: 32px;" class="text-center font-bold text-xs">{{ day }}</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td class="font-mono font-semibold text-sm" style="min-width: 110px;">{{ row.RollNumber }}</td>
+              <td style="min-width: 180px;">
+                <span class="user-name-text">{{ row.Name }}</span>
+              </td>
+              <td class="text-center text-success font-semibold" style="min-width: 60px;">{{ row.PresentDays }}</td>
+              <td class="text-center text-danger font-semibold" style="min-width: 60px;">{{ row.AbsentDays }}</td>
+              <td class="text-center text-warning font-semibold" style="min-width: 60px;">{{ row.LateDays }}</td>
+              <td class="text-center" style="min-width: 70px;">
+                <p-tag [value]="row.Percentage + '%'" [severity]="row.Percentage >= 80 ? 'success' : (row.Percentage >= 60 ? 'warn' : 'danger')"></p-tag>
+              </td>
+              <td *ngFor="let day of daysInMonth" class="text-center" style="min-width: 32px; padding: 0.5rem 0.2rem !important;">
+                <span *ngIf="row.DayStatusMap[day] === 'PRESENT'" class="text-success"><i class="pi pi-check-circle" style="font-size: 0.9rem;"></i></span>
+                <span *ngIf="row.DayStatusMap[day] === 'ABSENT'" class="text-danger"><i class="pi pi-times-circle" style="font-size: 0.9rem;"></i></span>
+                <span *ngIf="row.DayStatusMap[day] === 'LATE'" class="text-warning"><i class="pi pi-clock" style="font-size: 0.9rem;"></i></span>
+                <span *ngIf="!row.DayStatusMap[day]" class="text-slate-300">-</span>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td [attr.colspan]="6 + daysInMonth.length" class="empty-state">
+                <div class="empty-box">
+                  <i class="pi pi-folder-open"></i>
+                  <p>No monthly reports compiled for this class.</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <!-- TAB 3: ATTENDANCE HISTORY LOGS -->
+    <div *ngIf="activeTab === 'history'">
+      <p-table #dtLogs [value]="attendances" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
+        [loading]="isLoadingHistory" [globalFilterFields]="['Student.Name', 'Class.Name', 'Status', 'Date']"
+        styleClass="p-datatable-striped custom-user-table">
+
+        <!-- Caption Search -->
+        <ng-template pTemplate="caption">
+          <div class="caption-flex">
+            <div class="search-input-box">
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dtLogs.filterGlobal($any($event.target).value, 'contains')"
+                  placeholder="Search log records by student, class, date..." class="w-full" />
+              </span>
+            </div>
+          </div>
+        </ng-template>
+
+        <!-- Header -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="Date">Date <p-sortIcon field="Date"></p-sortIcon></th>
+            <th pSortableColumn="Student.Name">Student <p-sortIcon field="Student.Name"></p-sortIcon></th>
+            <th pSortableColumn="Class.Name">Class Section <p-sortIcon field="Class.Name"></p-sortIcon></th>
+            <th pSortableColumn="Status">Status <p-sortIcon field="Status"></p-sortIcon></th>
+            <th pSortableColumn="RecordedByTeacher.Name">Recorded By <p-sortIcon field="RecordedByTeacher.Name"></p-sortIcon></th>
+            <th class="text-right">Action</th>
+          </tr>
+        </ng-template>
+
+        <!-- Body -->
+        <ng-template pTemplate="body" let-log>
+          <tr>
+            <td>
+              <span class="text-sub font-semibold">{{ log?.Date | date:'yyyy-MM-dd' }}</span>
+            </td>
+            <td>
+              <div class="user-name-cell">
+                <div class="user-avatar">
+                  {{ (log?.Student?.Name || 'S')[0] | uppercase }}
+                </div>
+                <div class="user-details-col">
+                  <span class="user-name-text">{{ log?.Student?.Name }}</span>
+                  <span class="text-muted-sub" *ngIf="log?.Student?.Email">{{ log?.Student?.Email }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="text-sub font-semibold">{{ log?.Class?.Name }} ({{ log?.Class?.Section }})</span>
+            </td>
+            <td>
+              <p-tag [value]="log?.Status" [severity]="getStatusSeverity(log?.Status)"></p-tag>
+            </td>
+            <td>
+              <span class="text-sub">{{ log?.RecordedByTeacher?.Name || 'System' }}</span>
+            </td>
+            <td class="text-right">
+              <button pButton type="button" icon="pi pi-trash" title="Delete Log"
+                class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteAttendance(log.Id)">
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Empty State -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div class="empty-box">
+                <i class="pi pi-folder-open"></i>
+                <p>No logged attendance records found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+
+  </div>
+
+</div>
