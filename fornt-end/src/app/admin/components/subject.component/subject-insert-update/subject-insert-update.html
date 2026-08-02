@@ -8,7 +8,8 @@
     <div class="banner-content">
       <h3 class="banner-title">{{ isEdit ? 'Edit Subject Details' : 'Add New Subject' }}</h3>
       <p class="banner-subtitle">
-        {{ isEdit ? 'Modify subject details, department codes, or assign the instructor and class.' : 'Fill in subject details to enroll a new curriculum module.' }}
+        {{ isEdit ? 'Modify subject details, department codes, or assign the instructor and class.' : 'Fill in subject
+        details to enroll a new curriculum module.' }}
       </p>
     </div>
   </div>
@@ -35,6 +36,19 @@
 
     <div class="form-grid">
 
+
+      <!-- Department -->
+      <div class="form-group col-12">
+        <label for="subjectDept" class="form-label">Department</label>
+        <div class="input-with-icon">
+          <i class="pi pi-sitemap input-icon"></i>
+          <p-select id="subjectDept" [options]="departmentOptions" [(ngModel)]="formData.DepartmentId"
+            name="DepartmentId" optionLabel="label" optionValue="value" placeholder="Select Department"
+            [showClear]="true" styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+      </div>
+
       <!-- Subject Name -->
       <div class="form-group col-6">
         <label for="subjectName" class="form-label">
@@ -59,41 +73,7 @@
         </div>
       </div>
 
-      <!-- Class -->
-      <div class="form-group col-6">
-        <label for="subjectClass" class="form-label">Class</label>
-        <div class="input-with-icon">
-          <i class="pi pi-building input-icon"></i>
-          <p-select id="subjectClass" [options]="classOptions" [(ngModel)]="formData.ClassId" name="ClassId"
-            optionLabel="label" optionValue="value" placeholder="Select Class" [showClear]="true"
-            styleClass="w-full custom-dropdown">
-          </p-select>
-        </div>
-      </div>
 
-      <!-- Department -->
-      <div class="form-group col-6">
-        <label for="subjectDept" class="form-label">Department</label>
-        <div class="input-with-icon">
-          <i class="pi pi-sitemap input-icon"></i>
-          <p-select id="subjectDept" [options]="departmentOptions" [(ngModel)]="formData.DepartmentId" name="DepartmentId"
-            optionLabel="label" optionValue="value" placeholder="Select Department" [showClear]="true"
-            styleClass="w-full custom-dropdown">
-          </p-select>
-        </div>
-      </div>
-
-      <!-- Teacher -->
-      <div class="form-group col-12">
-        <label for="subjectTeacher" class="form-label">Assigned Teacher / Instructor</label>
-        <div class="input-with-icon">
-          <i class="pi pi-user input-icon"></i>
-          <p-select id="subjectTeacher" [options]="teacherOptions" [(ngModel)]="formData.TeacherId" name="TeacherId"
-            optionLabel="label" optionValue="value" placeholder="Select Instructor" [showClear]="true"
-            styleClass="w-full custom-dropdown">
-          </p-select>
-        </div>
-      </div>
 
     </div>
 

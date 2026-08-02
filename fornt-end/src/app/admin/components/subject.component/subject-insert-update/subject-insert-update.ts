@@ -14,18 +14,11 @@ export class SubjectInsertUpdateComponent implements OnInit {
   formData: Subject = {
     Name: '',
     Code: '',
-    DepartmentId: undefined,
-    TeacherId: undefined,
-    ClassId: undefined
+    DepartmentId: undefined
   };
 
   departments: any[] = [];
-  teachers: any[] = [];
-  classes: any[] = [];
-
   departmentOptions: { label: string; value: any }[] = [];
-  teacherOptions: { label: string; value: any }[] = [];
-  classOptions: { label: string; value: any }[] = [];
 
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -47,9 +40,7 @@ export class SubjectInsertUpdateComponent implements OnInit {
         Id: sub.Id,
         Name: sub.Name || '',
         Code: sub.Code || '',
-        DepartmentId: sub.DepartmentId ? Number(sub.DepartmentId) : (sub.Department?.Id ? Number(sub.Department.Id) : undefined),
-        TeacherId: sub.TeacherId ? Number(sub.TeacherId) : (sub.Teacher?.Id ? Number(sub.Teacher.Id) : undefined),
-        ClassId: sub.ClassId ? Number(sub.ClassId) : (sub.Class?.Id ? Number(sub.Class.Id) : undefined)
+        DepartmentId: sub.DepartmentId ? Number(sub.DepartmentId) : (sub.Department?.Id ? Number(sub.Department.Id) : undefined)
       };
     } else {
       this.isEdit = false;
@@ -68,37 +59,13 @@ export class SubjectInsertUpdateComponent implements OnInit {
       },
       error: (err) => console.error('Error fetching departments:', err)
     });
-
-    this.subjectService.getTeachers().subscribe({
-      next: (res) => {
-        this.teachers = res.data || [];
-        this.teacherOptions = this.teachers.map((t) => ({
-          label: t.Name,
-          value: t.Id
-        }));
-      },
-      error: (err) => console.error('Error fetching teachers:', err)
-    });
-
-    this.subjectService.getClasses().subscribe({
-      next: (res) => {
-        this.classes = res.data || [];
-        this.classOptions = this.classes.map((c) => ({
-          label: `${c.Name} (${c.Section})`,
-          value: c.Id
-        }));
-      },
-      error: (err) => console.error('Error fetching classes:', err)
-    });
   }
 
   resetForm(): void {
     this.formData = {
       Name: '',
       Code: '',
-      DepartmentId: undefined,
-      TeacherId: undefined,
-      ClassId: undefined
+      DepartmentId: undefined
     };
     this.errorMessage = '';
     this.successMessage = '';
@@ -122,8 +89,8 @@ export class SubjectInsertUpdateComponent implements OnInit {
         Name: this.formData.Name,
         Code: this.formData.Code,
         DepartmentId: this.formData.DepartmentId ? Number(this.formData.DepartmentId) : undefined,
-        TeacherId: this.formData.TeacherId ? Number(this.formData.TeacherId) : undefined,
-        ClassId: this.formData.ClassId ? Number(this.formData.ClassId) : undefined
+        TeacherId: undefined,
+        ClassId: undefined
       };
 
       this.subjectService.updateSubject(updatePayload).subscribe({
@@ -146,8 +113,8 @@ export class SubjectInsertUpdateComponent implements OnInit {
         Name: this.formData.Name,
         Code: this.formData.Code,
         DepartmentId: this.formData.DepartmentId ? Number(this.formData.DepartmentId) : undefined,
-        TeacherId: this.formData.TeacherId ? Number(this.formData.TeacherId) : undefined,
-        ClassId: this.formData.ClassId ? Number(this.formData.ClassId) : undefined
+        TeacherId: undefined,
+        ClassId: undefined
       };
 
       this.subjectService.addSubject(createPayload).subscribe({

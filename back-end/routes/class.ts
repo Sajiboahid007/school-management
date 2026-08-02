@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/class/get", async (req, res) => {
     try {
         const classes = await prisma.class.findMany({
-            include: { ClassTeacher: true },
+            include: { ClassTeacher: true, Subjects: true },
         });
         res.status(200).json({ data: classes, message: "Classes fetched successfully" });
     } catch (error) {
@@ -16,7 +16,7 @@ router.get("/class/get", async (req, res) => {
 
 router.post("/class/add", async (req, res) => {
     try {
-        const { Name, Section, RoomNumber, Capacity, ClassTeacherId } = req.body;
+        const { Name, Section, RoomNumber, Capacity, ClassTeacherId, SubjectIds } = req.body;
         const cls = await prisma.class.create({
             data: {
                 Name,
@@ -26,6 +26,12 @@ router.post("/class/add", async (req, res) => {
                 ClassTeacherId: ClassTeacherId ? Number(ClassTeacherId) : null,
             },
         });
+        if (SubjectIds && Array.isArray(SubjectIds)) {
+            await prisma.subject.updateMany({
+                where: { Id: { in: SubjectIds.map(Number) } },
+                data: { ClassId: cls.Id }
+            });
+        }
         res.status(201).json({ data: cls, message: "Class created successfully" });
     } catch (error) {
         res.status(400).json({ error: "Failed to create class" });
@@ -56,7 +62,7 @@ router.put(["/class/update", "/class/update/:id"], async (req, res) => {
         if (!id || isNaN(classId)) {
             return res.status(400).json({ error: "Invalid or missing class ID" });
         }
-        const { Name, Section, RoomNumber, Capacity, ClassTeacherId } = req.body;
+        const { Name, Section, RoomNumber, Capacity, ClassTeacherId, SubjectIds } = req.body;
         const cls = await prisma.class.update({
             where: { Id: classId },
             data: {
@@ -67,6 +73,18 @@ router.put(["/class/update", "/class/update/:id"], async (req, res) => {
                 ClassTeacherId: ClassTeacherId ? Number(ClassTeacherId) : null,
             },
         });
+        if (SubjectIds && Array.isArray(SubjectIds)) {
+            // Reset existing subjects' ClassId for this class
+            await prisma.subject.updateMany({
+                where: { ClassId: classId },
+                data: { ClassId: null }
+            });
+            // Set new subjects' ClassId
+            await prisma.subject.updateMany({
+                where: { Id: { in: SubjectIds.map(Number) } },
+                data: { ClassId: classId }
+            });
+        }
         res.status(200).json({ data: cls, message: "Class updated successfully" });
     } catch (error: any) {
         console.error("Error updating class:", error);

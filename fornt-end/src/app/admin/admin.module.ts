@@ -6,6 +6,7 @@ import { SharedModule } from '../shared/shared.module';
 
 // PrimeNG Modules & Services
 import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -35,6 +36,7 @@ import { ClassComponent } from './components/class.component/class.component';
 import { ClassInsertUpdateComponent } from './components/class.component/class-insert-update/class-insert-update';
 import { SubjectComponent } from './components/subject.component/subject.component';
 import { SubjectInsertUpdateComponent } from './components/subject.component/subject-insert-update/subject-insert-update';
+import { ClassesSubjectsComponent } from './components/classes-subjects/classes-subjects';
 import { AttendanceComponent } from './components/attendance.component/attendance.component';
 import { AttendanceInsertUpdateComponent } from './components/attendance.component/attendance-insert-update/attendance-insert-update';
 import { ExamsComponent } from './components/exams.component/exams.component';
@@ -64,6 +66,7 @@ import { FeeCollectComponent } from './components/fee-management.component/fee-c
     ClassInsertUpdateComponent,
     SubjectComponent,
     SubjectInsertUpdateComponent,
+    ClassesSubjectsComponent,
     AttendanceComponent,
     AttendanceInsertUpdateComponent,
     ExamsComponent,
@@ -79,6 +82,7 @@ import { FeeCollectComponent } from './components/fee-management.component/fee-c
     AdminRoutingModule,
     SharedModule,
     SelectModule,
+    MultiSelectModule,
     TableModule,
     DialogModule,
     ButtonModule,

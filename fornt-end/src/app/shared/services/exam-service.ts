@@ -93,4 +93,8 @@ export class ExamService {
   getTeachers(): Observable<AppQuery<any[]>> {
     return this.http.get<AppQuery<any[]>>(`${this.baseUrl}/teacher/get`);
   }
+
+  getClasses(): Observable<AppQuery<any[]>> {
+    return this.http.get<AppQuery<any[]>>(`${this.baseUrl}/class/get`);
+  }
 }

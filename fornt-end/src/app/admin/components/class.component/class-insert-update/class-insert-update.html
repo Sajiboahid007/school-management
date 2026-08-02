@@ -91,6 +91,18 @@
         </div>
       </div>
 
+      <!-- Assigned Subjects -->
+      <div class="form-group col-12">
+        <label for="classSubjects" class="form-label">Assigned Subjects</label>
+        <div class="input-with-icon">
+          <i class="pi pi-book input-icon" style="z-index:10;"></i>
+          <p-multiselect id="classSubjects" [options]="subjectOptions" [(ngModel)]="formData.SubjectIds" name="SubjectIds"
+            optionLabel="label" optionValue="value" placeholder="Select Subjects"
+            display="chip" styleClass="w-full custom-dropdown">
+          </p-multiselect>
+        </div>
+      </div>
+
     </div>
 
     <!-- Dialog Actions Footer -->

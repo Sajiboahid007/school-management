@@ -1,206 +1,201 @@
 <div class="user-modal-wrapper">
 
-  <!-- Header Banner -->
-  <div class="modal-banner">
-    <div class="banner-avatar">
-      <i class="pi" [ngClass]="isEdit ? 'pi-pencil' : 'pi-plus'"></i>
+  <!-- Compact header -->
+  <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem;">
+    <i class="pi pi-pencil" style="font-size:1.1rem;color:#6366f1;"></i>
+    <div>
+      <span style="font-weight:700;font-size:1rem;color:#1e1b4b;">
+        {{ type === 'exam' ? (isEdit ? 'Edit Exam' : 'Create Exam') : (isEdit ? 'Edit Result' : 'Enter Class Marks') }}
+      </span>
+      <span style="font-size:0.8rem;color:#64748b;margin-left:0.5rem;">
+        {{ type === 'exam' ? 'Fill exam schedule details' : (isEdit ? 'Update this result record' : '— select class, exam and fill marks per student') }}
+      </span>
     </div>
-    <div class="banner-content">
-      <h3 class="banner-title">
-        {{ type === 'exam' ? (isEdit ? 'Edit Exam Details' : 'Create Academic Exam') : (isEdit ? 'Edit Grade Marksheet' : 'Record Student Marks') }}
-      </h3>
-      <p class="banner-subtitle">
-        {{ type === 'exam' ? 'Define exam title, term, year, and scheduling timelines.' : 'Input student performance marks, grades, and teacher remarks.' }}
-      </p>
-    </div>
+  </div>
+
+  <!-- Error / Success -->
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    <i class="pi pi-exclamation-circle alert-icon"></i>
+    <div class="alert-text"><strong class="alert-title">Error</strong><span>{{ errorMessage }}</span></div>
+  </div>
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="pi pi-check-circle alert-icon"></i>
+    <div class="alert-text"><strong class="alert-title">Saved!</strong><span>{{ successMessage }}</span></div>
   </div>
 
   <form (ngSubmit)="onSubmit()" class="form-container">
 
-    <!-- Alert Banner for Error -->
-    <div class="alert alert-danger" *ngIf="errorMessage">
-      <i class="pi pi-exclamation-circle alert-icon"></i>
-      <div class="alert-text">
-        <strong class="alert-title">Unable to Save</strong>
-        <span>{{ errorMessage }}</span>
-      </div>
-    </div>
-
-    <!-- Alert Banner for Success -->
-    <div class="alert alert-success" *ngIf="successMessage">
-      <i class="pi pi-check-circle alert-icon"></i>
-      <div class="alert-text">
-        <strong class="alert-title">Success!</strong>
-        <span>{{ successMessage }}</span>
-      </div>
-    </div>
-
-    <!-- EXAM FORM GRID -->
+    <!-- ══════ EXAM FORM ══════ -->
     <div class="form-grid" *ngIf="type === 'exam'">
-      <!-- Title -->
       <div class="form-group col-12">
-        <label for="exTitle" class="form-label">
-          Exam Title <span class="required-star">*</span>
-        </label>
+        <label class="form-label">Exam Title <span class="required-star">*</span></label>
         <div class="input-with-icon">
           <i class="pi pi-bookmark input-icon"></i>
-          <input id="exTitle" type="text" pInputText [(ngModel)]="examData.Title" name="Title"
+          <input type="text" pInputText [(ngModel)]="examData.Title" name="Title"
             placeholder="e.g. Midterm Examination" class="w-full custom-input" required />
         </div>
       </div>
-
-      <!-- Term -->
       <div class="form-group col-6">
-        <label for="exTerm" class="form-label">
-          Term / Semester <span class="required-star">*</span>
-        </label>
+        <label class="form-label">Term / Semester <span class="required-star">*</span></label>
         <div class="input-with-icon">
           <i class="pi pi-clock input-icon"></i>
-          <input id="exTerm" type="text" pInputText [(ngModel)]="examData.Term" name="Term"
-            placeholder="e.g. Fall Semester" class="w-full custom-input" required />
+          <input type="text" pInputText [(ngModel)]="examData.Term" name="Term"
+            placeholder="e.g. Fall 2026" class="w-full custom-input" required />
         </div>
       </div>
-
-      <!-- Academic Year -->
       <div class="form-group col-6">
-        <label for="exYear" class="form-label">
-          Academic Year <span class="required-star">*</span>
-        </label>
+        <label class="form-label">Academic Year <span class="required-star">*</span></label>
         <div class="input-with-icon">
           <i class="pi pi-calendar input-icon"></i>
-          <input id="exYear" type="text" pInputText [(ngModel)]="examData.AcademicYear" name="AcademicYear"
+          <input type="text" pInputText [(ngModel)]="examData.AcademicYear" name="AcademicYear"
             placeholder="e.g. 2026-2027" class="w-full custom-input" required />
         </div>
       </div>
-
-      <!-- Start Date -->
       <div class="form-group col-6">
-        <label for="exStart" class="form-label">Start Date</label>
-        <div class="input-with-icon">
-          <i class="pi pi-calendar-plus input-icon"></i>
-          <input id="exStart" type="date" pInputText [(ngModel)]="examData.StartDate" name="StartDate"
-            class="w-full custom-input" />
-        </div>
+        <label class="form-label">Start Date</label>
+        <input type="date" pInputText [(ngModel)]="examData.StartDate" name="StartDate" class="w-full custom-input" />
       </div>
-
-      <!-- End Date -->
       <div class="form-group col-6">
-        <label for="exEnd" class="form-label">End Date</label>
-        <div class="input-with-icon">
-          <i class="pi pi-calendar-minus input-icon"></i>
-          <input id="exEnd" type="date" pInputText [(ngModel)]="examData.EndDate" name="EndDate"
-            class="w-full custom-input" />
-        </div>
+        <label class="form-label">End Date</label>
+        <input type="date" pInputText [(ngModel)]="examData.EndDate" name="EndDate" class="w-full custom-input" />
       </div>
     </div>
 
-    <!-- RESULT FORM GRID -->
-    <div class="form-grid" *ngIf="type === 'result'">
-      <!-- Exam Selection -->
+    <!-- ══════ SINGLE EDIT RESULT FORM ══════ -->
+    <div class="form-grid" *ngIf="type === 'result' && isEdit">
       <div class="form-group col-6">
-        <label for="resExam" class="form-label">
-          Exam Schedule <span class="required-star">*</span>
-        </label>
-        <div class="input-with-icon">
-          <i class="pi pi-bookmark input-icon"></i>
-          <p-select id="resExam" [options]="examOptions" [(ngModel)]="resultData.ExamId" name="ExamId"
-            optionLabel="label" optionValue="value" placeholder="Select Exam"
-            styleClass="w-full custom-dropdown">
-          </p-select>
-        </div>
+        <label class="form-label">Exam <span class="required-star">*</span></label>
+        <p-select [options]="examOptions" [(ngModel)]="resultData.ExamId" name="ExamId"
+          placeholder="Select Exam" styleClass="w-full custom-dropdown"></p-select>
       </div>
-
-      <!-- Student Selection -->
       <div class="form-group col-6">
-        <label for="resStudent" class="form-label">
-          Student <span class="required-star">*</span>
-        </label>
-        <div class="input-with-icon">
-          <i class="pi pi-user input-icon"></i>
-          <p-select id="resStudent" [options]="studentOptions" [(ngModel)]="resultData.StudentId" name="StudentId"
-            optionLabel="label" optionValue="value" placeholder="Select Student" [filter]="true"
-            styleClass="w-full custom-dropdown">
-          </p-select>
-        </div>
+        <label class="form-label">Subject <span class="required-star">*</span></label>
+        <p-select [options]="subjectOptions" [(ngModel)]="resultData.SubjectId" name="SubjectId"
+          placeholder="Select Subject" styleClass="w-full custom-dropdown"></p-select>
       </div>
-
-      <!-- Subject Selection -->
       <div class="form-group col-6">
-        <label for="resSubject" class="form-label">
-          Subject <span class="required-star">*</span>
-        </label>
-        <div class="input-with-icon">
-          <i class="pi pi-book input-icon"></i>
-          <p-select id="resSubject" [options]="subjectOptions" [(ngModel)]="resultData.SubjectId" name="SubjectId"
-            optionLabel="label" optionValue="value" placeholder="Select Subject"
-            styleClass="w-full custom-dropdown">
-          </p-select>
-        </div>
+        <label class="form-label">Marks Obtained <span class="required-star">*</span></label>
+        <input type="number" pInputText [(ngModel)]="resultData.MarksObtained" name="MarksObtained"
+          class="w-full custom-input" min="0" />
       </div>
-
-      <!-- Recorded By Selection -->
       <div class="form-group col-6">
-        <label for="resTeacher" class="form-label">Recorded By (Teacher)</label>
-        <div class="input-with-icon">
-          <i class="pi pi-user-edit input-icon"></i>
-          <p-select id="resTeacher" [options]="teacherOptions" [(ngModel)]="resultData.RecordedByTeacherId" name="RecordedByTeacherId"
-            optionLabel="label" optionValue="value" placeholder="Select Instructor" [showClear]="true"
-            styleClass="w-full custom-dropdown">
-          </p-select>
-        </div>
+        <label class="form-label">Total Marks</label>
+        <input type="number" pInputText [(ngModel)]="resultData.TotalMarks" name="TotalMarks"
+          class="w-full custom-input" min="1" />
       </div>
-
-      <!-- Marks Obtained -->
       <div class="form-group col-6">
-        <label for="resMarks" class="form-label">
-          Marks Obtained <span class="required-star">*</span>
-        </label>
-        <div class="input-with-icon">
-          <i class="pi pi-percentage input-icon"></i>
-          <input id="resMarks" type="number" pInputText [(ngModel)]="resultData.MarksObtained" name="MarksObtained"
-            class="w-full custom-input" min="0" required />
-        </div>
+        <label class="form-label">Grade</label>
+        <input type="text" pInputText [(ngModel)]="resultData.Grade" name="Grade"
+          placeholder="e.g. A+" class="w-full custom-input" />
       </div>
-
-      <!-- Total Marks -->
       <div class="form-group col-6">
-        <label for="resTotal" class="form-label">Total Marks</label>
-        <div class="input-with-icon">
-          <i class="pi pi-plus input-icon"></i>
-          <input id="resTotal" type="number" pInputText [(ngModel)]="resultData.TotalMarks" name="TotalMarks"
-            class="w-full custom-input" min="1" />
-        </div>
-      </div>
-
-      <!-- Grade -->
-      <div class="form-group col-6">
-        <label for="resGrade" class="form-label">Grade</label>
-        <div class="input-with-icon">
-          <i class="pi pi-star input-icon"></i>
-          <input id="resGrade" type="text" pInputText [(ngModel)]="resultData.Grade" name="Grade"
-            placeholder="e.g. A+" class="w-full custom-input" />
-        </div>
-      </div>
-
-      <!-- Remarks -->
-      <div class="form-group col-6">
-        <label for="resRemarks" class="form-label">Remarks</label>
-        <div class="input-with-icon">
-          <i class="pi pi-info input-icon"></i>
-          <input id="resRemarks" type="text" pInputText [(ngModel)]="resultData.Remarks" name="Remarks"
-            placeholder="e.g. Excellent progress" class="w-full custom-input" />
-        </div>
+        <label class="form-label">Recorded By (Teacher)</label>
+        <p-select [options]="teacherOptions" [(ngModel)]="resultData.RecordedByTeacherId" name="RecordedByTeacherId"
+          placeholder="Select Teacher" [showClear]="true" styleClass="w-full custom-dropdown"></p-select>
       </div>
     </div>
 
-    <!-- Dialog Actions Footer -->
+    <!-- ══════ BULK MARKS ENTRY ══════ -->
+    <ng-container *ngIf="type === 'result' && !isEdit">
+
+      <!-- Top filter row: Class | Exam | Teacher | Total Marks -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0.75rem;margin-bottom:1rem;align-items:end;">
+        <div>
+          <label style="display:block;font-size:0.78rem;font-weight:700;color:#64748b;margin-bottom:0.3rem;">CLASS <span style="color:#e11d48;">*</span></label>
+          <p-select [options]="classOptions" [(ngModel)]="selectedClassId" name="classId"
+            (onChange)="onClassChange()" placeholder="Select Class" styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.78rem;font-weight:700;color:#64748b;margin-bottom:0.3rem;">EXAM <span style="color:#e11d48;">*</span></label>
+          <p-select [options]="examOptions" [(ngModel)]="selectedExamId" name="examId"
+            placeholder="Select Exam" styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.78rem;font-weight:700;color:#64748b;margin-bottom:0.3rem;">RECORDED BY</label>
+          <p-select [options]="teacherOptions" [(ngModel)]="selectedTeacherId" name="teacherId"
+            placeholder="Select Teacher" [showClear]="true" styleClass="w-full custom-dropdown">
+          </p-select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.78rem;font-weight:700;color:#64748b;margin-bottom:0.3rem;">OUT OF</label>
+          <input type="number" pInputText [(ngModel)]="totalMarksDefault" name="totalMarks"
+            (ngModelChange)="onTotalMarksChange()" min="1"
+            style="width:72px;border:1px solid #cbd5e1;border-radius:8px;padding:0.45rem 0.6rem;font-weight:700;text-align:center;" />
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoadingData" class="text-center py-4">
+        <i class="pi pi-spin pi-spinner" style="font-size:1.5rem;color:#6366f1;"></i>
+        <p class="text-muted-sub mt-2">Loading students &amp; subjects…</p>
+      </div>
+
+      <!-- Marks table -->
+      <div *ngIf="!isLoadingData && markRows.length > 0"
+        style="overflow-x:auto;border:1px solid #e2e8f0;border-radius:10px;max-height:400px;overflow-y:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:500px;">
+          <thead style="position:sticky;top:0;z-index:2;">
+            <tr style="background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;">
+              <th style="padding:0.6rem 0.8rem;text-align:left;font-size:0.72rem;font-weight:700;white-space:nowrap;min-width:90px;">Roll No</th>
+              <th style="padding:0.6rem 0.8rem;text-align:left;font-size:0.72rem;font-weight:700;min-width:150px;">Student Name</th>
+              <th *ngFor="let sub of classSubjects"
+                style="padding:0.6rem 0.7rem;text-align:center;font-size:0.72rem;font-weight:700;white-space:nowrap;min-width:110px;">
+                {{ sub.Name }}<br><span style="font-size:0.65rem;opacity:0.8;">({{ sub.Code }})</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of markRows; let i = index"
+              [style.background]="i % 2 === 0 ? '#fff' : '#f8fafc'"
+              style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:0.65rem 0.8rem;font-family:monospace;font-weight:700;font-size:0.82rem;color:#334155;white-space:nowrap;">
+                {{ row.RollNumber }}
+              </td>
+              <td style="padding:0.65rem 0.8rem;">
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                  <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;flex-shrink:0;">
+                    {{ (row.Name || 'S')[0] | uppercase }}
+                  </div>
+                  <span style="font-weight:600;font-size:0.88rem;color:#1e293b;">{{ row.Name }}</span>
+                </div>
+              </td>
+              <td *ngFor="let sub of classSubjects" style="padding:0.5rem 0.6rem;text-align:center;">
+                <div style="display:flex;align-items:center;justify-content:center;gap:4px;">
+                  <input type="number" [(ngModel)]="row.Marks[sub.Id].MarksObtained"
+                    [name]="'marks_' + row.StudentId + '_' + sub.Id"
+                    (ngModelChange)="onMarksInput(row, sub.Id)"
+                    [max]="row.Marks[sub.Id].TotalMarks" min="0"
+                    style="width:58px;border:1px solid #cbd5e1;border-radius:7px;padding:0.35rem 0.4rem;text-align:center;font-weight:700;font-size:0.9rem;color:#1e293b;" />
+                  <span *ngIf="row.Marks[sub.Id].Grade"
+                    [style.color]="row.Marks[sub.Id].Grade === 'F' ? '#dc2626' : row.Marks[sub.Id].Grade.startsWith('A') ? '#16a34a' : '#d97706'"
+                    style="font-size:0.72rem;font-weight:800;min-width:22px;">
+                    {{ row.Marks[sub.Id].Grade }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="!isLoadingData && markRows.length === 0 && selectedClassId" class="text-center py-4">
+        <i class="pi pi-users" style="font-size:2rem;color:#cbd5e1;"></i>
+        <p class="text-muted-sub mt-2">No students enrolled in this class.</p>
+      </div>
+
+    </ng-container>
+
+    <!-- Footer actions -->
     <div class="form-actions">
       <button type="button" pButton label="Cancel" icon="pi pi-times"
         class="p-button-text p-button-secondary btn-cancel" (click)="onCancel()">
       </button>
-      <button type="submit" pButton [label]="isEdit ? 'Save Changes' : 'Record Entry'"
-        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-plus-circle'" [loading]="isLoading"
-        class="p-button-indigo btn-submit">
+      <button type="submit" pButton
+        [label]="isEdit ? 'Save Changes' : (type === 'exam' ? 'Create Exam' : 'Save Marks')"
+        [icon]="isEdit ? 'pi pi-check-circle' : 'pi pi-save'"
+        [loading]="isLoading" class="p-button-indigo btn-submit">
       </button>
     </div>
 

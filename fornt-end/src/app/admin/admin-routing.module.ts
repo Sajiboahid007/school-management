@@ -11,6 +11,7 @@ import { TeacherComponent } from './components/teacher.component/teacher.compone
 import { DepartmentComponent } from './components/department.component/department.component';
 import { ClassComponent } from './components/class.component/class.component';
 import { SubjectComponent } from './components/subject.component/subject.component';
+import { ClassesSubjectsComponent } from './components/classes-subjects/classes-subjects';
 import { AttendanceComponent } from './components/attendance.component/attendance.component';
 import { ExamsComponent } from './components/exams.component/exams.component';
 import { ScheduleComponent } from './components/schedule.component/schedule.component';
@@ -31,6 +32,7 @@ const routes: Routes = [
       { path: 'department', component: DepartmentComponent },
       { path: 'class', component: ClassComponent },
       { path: 'subject', component: SubjectComponent },
+      { path: 'classes', component: ClassesSubjectsComponent },
       { path: 'attendance', component: AttendanceComponent },
       { path: 'exams', component: ExamsComponent },
       { path: 'schedule', component: ScheduleComponent },

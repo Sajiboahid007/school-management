@@ -47,6 +47,7 @@
           <th pSortableColumn="Section">Section <p-sortIcon field="Section"></p-sortIcon></th>
           <th pSortableColumn="RoomNumber">Room Number <p-sortIcon field="RoomNumber"></p-sortIcon></th>
           <th pSortableColumn="Capacity">Capacity <p-sortIcon field="Capacity"></p-sortIcon></th>
+          <th>Subjects</th>
           <th pSortableColumn="ClassTeacher.Name">Class Teacher <p-sortIcon field="ClassTeacher.Name"></p-sortIcon></th>
           <th class="text-right">Action</th>
         </tr>
@@ -66,6 +67,14 @@
           </td>
           <td>
             <span class="text-sub">{{ cls?.Capacity || 40 }} Students</span>
+          </td>
+          <td>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 220px;" *ngIf="cls?.Subjects && cls.Subjects.length > 0; else noSubjects">
+              <p-tag *ngFor="let s of cls.Subjects" [value]="s.Name" severity="secondary" style="font-size: 0.725rem; font-weight: 600;"></p-tag>
+            </div>
+            <ng-template #noSubjects>
+              <span class="text-muted-sub text-sm">—</span>
+            </ng-template>
           </td>
           <td>
             <div class="user-name-cell" *ngIf="cls?.ClassTeacher; else unassigned">
@@ -95,7 +104,7 @@
       <!-- EMPTY STATE -->
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="6" class="empty-state">
+          <td colspan="7" class="empty-state">
             <div class="empty-box">
               <i class="pi pi-folder-open"></i>
               <p>No class records found</p>

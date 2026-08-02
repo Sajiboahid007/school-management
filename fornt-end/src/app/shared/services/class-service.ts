@@ -12,6 +12,8 @@ export interface Class {
   Capacity?: number;
   ClassTeacherId?: number;
   ClassTeacher?: { Id: number; Name: string; Email?: string };
+  Subjects?: any[];
+  SubjectIds?: number[];
   CreatedAt?: string;
   UpdatedAt?: string;
 }
@@ -46,5 +48,9 @@ export class ClassService {
 
   getTeachers(): Observable<AppQuery<any[]>> {
     return this.http.get<AppQuery<any[]>>(`${this.baseUrl}/teacher/get`);
+  }
+
+  getSubjects(): Observable<AppQuery<any[]>> {
+    return this.http.get<AppQuery<any[]>>(`${this.baseUrl}/subject/get`);
   }
 }

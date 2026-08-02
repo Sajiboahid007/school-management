@@ -16,11 +16,15 @@ export class ClassInsertUpdateComponent implements OnInit {
     Section: '',
     RoomNumber: '',
     Capacity: 40,
-    ClassTeacherId: undefined
+    ClassTeacherId: undefined,
+    SubjectIds: []
   };
 
   teachers: any[] = [];
   teacherOptions: { label: string; value: any }[] = [];
+
+  subjects: any[] = [];
+  subjectOptions: { label: string; value: any }[] = [];
 
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -44,7 +48,8 @@ export class ClassInsertUpdateComponent implements OnInit {
         Section: cls.Section || '',
         RoomNumber: cls.RoomNumber || '',
         Capacity: cls.Capacity || 40,
-        ClassTeacherId: cls.ClassTeacherId ? Number(cls.ClassTeacherId) : (cls.ClassTeacher?.Id ? Number(cls.ClassTeacher.Id) : undefined)
+        ClassTeacherId: cls.ClassTeacherId ? Number(cls.ClassTeacherId) : (cls.ClassTeacher?.Id ? Number(cls.ClassTeacher.Id) : undefined),
+        SubjectIds: cls.Subjects ? cls.Subjects.map((s: any) => s.Id) : []
       };
     } else {
       this.isEdit = false;
@@ -63,6 +68,17 @@ export class ClassInsertUpdateComponent implements OnInit {
       },
       error: (err) => console.error('Error fetching teachers:', err)
     });
+
+    this.classService.getSubjects().subscribe({
+      next: (res) => {
+        this.subjects = res.data || [];
+        this.subjectOptions = this.subjects.map((s) => ({
+          label: `${s.Name} (${s.Code})`,
+          value: s.Id
+        }));
+      },
+      error: (err) => console.error('Error fetching subjects:', err)
+    });
   }
 
   resetForm(): void {
@@ -71,7 +87,8 @@ export class ClassInsertUpdateComponent implements OnInit {
       Section: '',
       RoomNumber: '',
       Capacity: 40,
-      ClassTeacherId: undefined
+      ClassTeacherId: undefined,
+      SubjectIds: []
     };
     this.errorMessage = '';
     this.successMessage = '';
@@ -96,7 +113,8 @@ export class ClassInsertUpdateComponent implements OnInit {
         Section: this.formData.Section,
         RoomNumber: this.formData.RoomNumber,
         Capacity: this.formData.Capacity ? Number(this.formData.Capacity) : undefined,
-        ClassTeacherId: this.formData.ClassTeacherId ? Number(this.formData.ClassTeacherId) : undefined
+        ClassTeacherId: this.formData.ClassTeacherId ? Number(this.formData.ClassTeacherId) : undefined,
+        SubjectIds: this.formData.SubjectIds
       };
 
       this.classService.updateClass(updatePayload).subscribe({
@@ -120,7 +138,8 @@ export class ClassInsertUpdateComponent implements OnInit {
         Section: this.formData.Section,
         RoomNumber: this.formData.RoomNumber,
         Capacity: this.formData.Capacity ? Number(this.formData.Capacity) : undefined,
-        ClassTeacherId: this.formData.ClassTeacherId ? Number(this.formData.ClassTeacherId) : undefined
+        ClassTeacherId: this.formData.ClassTeacherId ? Number(this.formData.ClassTeacherId) : undefined,
+        SubjectIds: this.formData.SubjectIds
       };
 
       this.classService.addClass(createPayload).subscribe({

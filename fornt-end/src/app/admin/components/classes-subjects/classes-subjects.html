@@ -1,0 +1,107 @@
+<div class="user-management-container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <i class="pi pi-book-open"></i>
+      </div>
+      <div>
+        <h2 class="header-title">Classes &amp; Subjects</h2>
+        <p class="header-subtitle">Assign teachers and instructors to subjects for each class grade</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Banner for Error -->
+  <div class="alert alert-danger" *ngIf="errorMessage" style="margin-bottom: 1.5rem;">
+    <i class="pi pi-exclamation-circle alert-icon"></i>
+    <div class="alert-text">
+      <strong class="alert-title">Operation Failed</strong>
+      <span>{{ errorMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Alert Banner for Success -->
+  <div class="alert alert-success" *ngIf="successMessage" style="margin-bottom: 1.5rem;">
+    <i class="pi pi-check-circle alert-icon"></i>
+    <div class="alert-text">
+      <strong class="alert-title">Saved</strong>
+      <span>{{ successMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="card p-card-custom">
+
+    <!-- Top Class Selector Ribbon -->
+    <div class="filter-ribbon" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
+      <div class="filter-inputs-group">
+        <div class="filter-item">
+          <span class="text-sub font-semibold text-sm">Class Grade:</span>
+          <p-select [options]="classOptions" [(ngModel)]="selectedClassId"
+            (onChange)="onClassChange()" placeholder="Select Class"
+            style="width: 220px !important;">
+          </p-select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table of Subjects for selected class -->
+    <p-table [value]="filteredSubjects" [loading]="isLoading" dataKey="Id"
+      styleClass="p-datatable-striped custom-user-table">
+
+      <!-- TABLE HEADER -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 120px;">Code</th>
+          <th>Subject Name</th>
+          <th>Assigned Instructor</th>
+          <th class="text-right" style="width: 150px;">Action</th>
+        </tr>
+      </ng-template>
+
+      <!-- TABLE BODY -->
+      <ng-template pTemplate="body" let-sub>
+        <tr>
+          <td>
+            <span class="text-sub font-mono font-semibold">{{ sub?.Code }}</span>
+          </td>
+          <td>
+            <span class="user-name-text">{{ sub?.Name }}</span>
+          </td>
+          <td>
+            <div style="width: 280px;">
+              <p-select [options]="teacherOptions" [(ngModel)]="sub.TeacherId"
+                placeholder="Select Instructor" [showClear]="true"
+                styleClass="w-full custom-dropdown">
+              </p-select>
+            </div>
+          </td>
+          <td class="text-right">
+            <button pButton type="button" label="Save" icon="pi pi-save"
+              class="p-button-indigo p-button-sm font-semibold"
+              [loading]="isSaving[sub.Id]"
+              (click)="onTeacherAssign(sub)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- EMPTY STATE -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="empty-state">
+            <div class="empty-box">
+              <i class="pi pi-folder-open"></i>
+              <p>No subjects assigned to this class. Go to <strong>Class Management</strong> to assign subjects.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+  </div>
+
+</div>

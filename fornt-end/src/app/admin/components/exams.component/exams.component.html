@@ -1,44 +1,154 @@
 <div class="user-management-container">
 
-  <!-- PrimeNG Confirm Dialog -->
   <p-confirmDialog header="Confirm Action" icon="pi pi-exclamation-triangle"></p-confirmDialog>
 
-  <!-- Page Header Bar -->
+  <!-- Page Header -->
   <div class="page-header">
     <div class="header-info">
-      <div class="header-icon">
-        <i class="pi pi-clipboard-list"></i>
-      </div>
+      <div class="header-icon"><i class="pi pi-chart-bar"></i></div>
       <div>
         <h2 class="header-title">Exams & Results</h2>
-        <p class="header-subtitle">Schedule school exams and record grade performance results for students</p>
+        <p class="header-subtitle">View per-class marksheets, manage exams and enter student grades</p>
       </div>
     </div>
 
-    <!-- Switch tabs and header action buttons -->
-    <div class="flex items-center gap-2">
-      <div class="p-selectbutton-custom mr-3">
-        <button pButton type="button" label="Exam Schedules" 
-          [class]="activeTab === 'exams' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
-          (click)="switchTab('exams')"></button>
-        <button pButton type="button" label="Student Results" 
-          [class]="activeTab === 'results' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
-          (click)="switchTab('results')"></button>
-      </div>
-
-      <button pButton type="button" [label]="activeTab === 'exams' ? 'Add Exam' : 'Record Marks'" icon="pi pi-plus" 
-        class="p-button-indigo btn-add-user" (click)="activeTab === 'exams' ? onAddExam() : onAddResult()">
-      </button>
+    <div class="p-selectbutton-custom">
+      <button pButton type="button" label="Class Marksheet"
+        [class]="activeTab === 'marksheet' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('marksheet')"></button>
+      <button pButton type="button" label="Exams"
+        [class]="activeTab === 'exams' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('exams')"></button>
+      <button pButton type="button" label="Results Ledger"
+        [class]="activeTab === 'results' ? 'p-button-indigo font-semibold' : 'p-button-outlined p-button-secondary'"
+        (click)="switchTab('results')"></button>
     </div>
   </div>
 
-  <!-- Main Card wrapper -->
   <div class="card p-card-custom">
 
-    <!-- Tab 1: Exam Definition list -->
+    <!-- ═══════════════════ TAB 1: CLASS MARKSHEET ═══════════════════ -->
+    <div *ngIf="activeTab === 'marksheet'">
+
+      <!-- Filter Ribbon -->
+      <div class="filter-ribbon">
+        <div class="filter-inputs-group">
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Class:</span>
+            <p-select [options]="classOptions" [(ngModel)]="selectedClassId"
+              (onChange)="onFilterChange()" placeholder="Select Class"
+              style="width:180px !important;">
+            </p-select>
+          </div>
+          <div class="filter-item">
+            <span class="text-sub font-semibold text-sm">Exam:</span>
+            <p-select [options]="examOptions" [(ngModel)]="selectedExamId"
+              (onChange)="onFilterChange()" placeholder="All Exams"
+              style="width:200px !important;">
+            </p-select>
+          </div>
+          <button pButton type="button" label="Enter Marks" icon="pi pi-plus"
+            class="p-button-indigo p-button-sm font-semibold ml-auto"
+            style="border-radius:8px;" (click)="onAddResult()">
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoadingMarksheet || isLoadingClasses" class="text-center py-5">
+        <i class="pi pi-spin pi-spinner" style="font-size:2rem;color:#6366f1;"></i>
+        <p class="text-muted-sub mt-2">Loading marksheet…</p>
+      </div>
+
+      <!-- No results placeholder -->
+      <div *ngIf="!isLoadingMarksheet && !isLoadingClasses && marksheetRows.length === 0 && subjectColumns.length === 0"
+        class="empty-state">
+        <div class="empty-box">
+          <i class="pi pi-book"></i>
+          <p>No exam results found for this class. Use <strong>Enter Marks</strong> to add records.</p>
+        </div>
+      </div>
+
+      <!-- Marksheet Table (horizontal scroll for many subjects) -->
+      <div *ngIf="!isLoadingMarksheet && marksheetRows.length > 0"
+        style="overflow-x:auto; border-radius:12px; border:1px solid #e2e8f0;">
+        <table style="width:100%; border-collapse:collapse; min-width:600px;">
+          <thead>
+            <tr style="background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;">
+              <th style="padding:0.75rem 1rem;font-size:0.75rem;font-weight:700;text-align:left;white-space:nowrap;">Roll No</th>
+              <th style="padding:0.75rem 1rem;font-size:0.75rem;font-weight:700;text-align:left;min-width:160px;">Student Name</th>
+              <th *ngFor="let sub of subjectColumns"
+                style="padding:0.75rem 0.9rem;font-size:0.75rem;font-weight:700;text-align:center;white-space:nowrap;">
+                {{ sub }}
+              </th>
+              <th style="padding:0.75rem 0.9rem;font-size:0.75rem;font-weight:700;text-align:center;white-space:nowrap;background:rgba(0,0,0,0.15);">Total</th>
+              <th style="padding:0.75rem 0.9rem;font-size:0.75rem;font-weight:700;text-align:center;white-space:nowrap;background:rgba(0,0,0,0.15);">%</th>
+              <th style="padding:0.75rem 0.9rem;font-size:0.75rem;font-weight:700;text-align:center;white-space:nowrap;background:rgba(0,0,0,0.15);">Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of marksheetRows; let i = index"
+              [style.background]="i % 2 === 0 ? '#fff' : '#f8fafc'"
+              style="border-bottom:1px solid #f1f5f9; transition: background 0.15s;"
+              (mouseenter)="$any($event.currentTarget).style.background='#eef2ff'"
+              (mouseleave)="$any($event.currentTarget).style.background = i % 2 === 0 ? '#fff' : '#f8fafc'">
+
+              <!-- Roll No -->
+              <td style="padding:0.85rem 1rem;font-family:monospace;font-weight:700;font-size:0.85rem;color:#334155;white-space:nowrap;">
+                {{ row.RollNumber }}
+              </td>
+
+              <!-- Student Name -->
+              <td style="padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">
+                    {{ (row.Name || 'S')[0] | uppercase }}
+                  </div>
+                  <span style="font-weight:600;font-size:0.9rem;color:#1e293b;">{{ row.Name }}</span>
+                </div>
+              </td>
+
+              <!-- Per-subject marks -->
+              <td *ngFor="let sub of subjectColumns"
+                style="padding:0.85rem 0.9rem;text-align:center;">
+                <ng-container *ngIf="row.Subjects[sub]?.Grade !== '—'; else noMark">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                    <span style="font-weight:700;font-size:0.95rem;color:#1e293b;">
+                      {{ row.Subjects[sub]?.MarksObtained }}<span style="color:#94a3b8;font-size:0.75rem;">/{{ row.Subjects[sub]?.TotalMarks }}</span>
+                    </span>
+                    <p-tag [value]="row.Subjects[sub]?.Grade || ''" [severity]="getGradeSeverity(row.Subjects[sub]?.Grade)"
+                      style="font-size:0.7rem;"></p-tag>
+                  </div>
+                </ng-container>
+                <ng-template #noMark>
+                  <span style="color:#cbd5e1;font-size:1rem;">—</span>
+                </ng-template>
+              </td>
+
+              <!-- Totals -->
+              <td style="padding:0.85rem 0.9rem;text-align:center;font-weight:700;color:#334155;background:#f8fafc;">
+                {{ row.TotalObtained }}<span style="color:#94a3b8;font-size:0.75rem;">/{{ row.TotalPossible }}</span>
+              </td>
+              <td style="padding:0.85rem 0.9rem;text-align:center;background:#f8fafc;">
+                <span [style.color]="row.Percentage >= 50 ? '#16a34a' : '#dc2626'" style="font-weight:700;font-size:0.9rem;">
+                  {{ row.Percentage }}%
+                </span>
+              </td>
+              <td style="padding:0.85rem 0.9rem;text-align:center;background:#f8fafc;">
+                <p-tag [value]="row.OverallGrade" [severity]="getGradeSeverity(row.OverallGrade)"
+                  style="font-size:0.85rem;font-weight:800;"></p-tag>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ TAB 2: EXAMS LIST ═══════════════════ -->
     <div *ngIf="activeTab === 'exams'">
-      <p-table #dtExams [value]="exams" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
-        [loading]="isLoadingExams" [globalFilterFields]="['Title', 'Term', 'AcademicYear']"
+      <p-table #dtExams [value]="exams" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
+        [paginator]="true" [loading]="isLoadingExams"
+        [globalFilterFields]="['Title','Term','AcademicYear']"
         styleClass="p-datatable-striped custom-user-table">
 
         <ng-template pTemplate="caption">
@@ -46,70 +156,56 @@
             <div class="search-input-box">
               <span class="p-input-icon-left w-full">
                 <i class="pi pi-search"></i>
-                <input pInputText type="text" (input)="dtExams.filterGlobal($any($event.target).value, 'contains')"
-                  placeholder="Search by exam title, term, academic year..." class="w-full" />
+                <input pInputText type="text"
+                  (input)="dtExams.filterGlobal($any($event.target).value,'contains')"
+                  placeholder="Search exams…" class="w-full" />
               </span>
             </div>
+            <button pButton type="button" label="New Exam" icon="pi pi-plus"
+              class="p-button-indigo p-button-sm font-semibold"
+              style="border-radius:8px;" (click)="onAddExam()">
+            </button>
           </div>
         </ng-template>
 
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="Title">Exam Title <p-sortIcon field="Title"></p-sortIcon></th>
-            <th pSortableColumn="Term">Term / Semester <p-sortIcon field="Term"></p-sortIcon></th>
+            <th pSortableColumn="Title">Title <p-sortIcon field="Title"></p-sortIcon></th>
+            <th pSortableColumn="Term">Term <p-sortIcon field="Term"></p-sortIcon></th>
             <th pSortableColumn="AcademicYear">Academic Year <p-sortIcon field="AcademicYear"></p-sortIcon></th>
             <th pSortableColumn="StartDate">Start Date <p-sortIcon field="StartDate"></p-sortIcon></th>
             <th pSortableColumn="EndDate">End Date <p-sortIcon field="EndDate"></p-sortIcon></th>
-            <th class="text-right">Action</th>
+            <th class="text-right">Actions</th>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="body" let-ex>
           <tr>
-            <td>
-              <span class="user-name-text">{{ ex.Title }}</span>
-            </td>
-            <td>
-              <span class="text-sub font-semibold">{{ ex.Term }}</span>
-            </td>
-            <td>
-              <p-tag [value]="ex.AcademicYear" severity="info"></p-tag>
-            </td>
-            <td>
-              <span class="text-sub font-mono">{{ (ex.StartDate | date:'yyyy-MM-dd') || 'N/A' }}</span>
-            </td>
-            <td>
-              <span class="text-sub font-mono">{{ (ex.EndDate | date:'yyyy-MM-dd') || 'N/A' }}</span>
-            </td>
+            <td><span class="user-name-text">{{ ex?.Title }}</span></td>
+            <td><p-tag [value]="ex?.Term" severity="info"></p-tag></td>
+            <td><span class="text-sub font-semibold">{{ ex?.AcademicYear }}</span></td>
+            <td><span class="text-sub">{{ ex?.StartDate | date:'yyyy-MM-dd' }}</span></td>
+            <td><span class="text-sub">{{ ex?.EndDate | date:'yyyy-MM-dd' }}</span></td>
             <td class="text-right">
-              <button pButton type="button" icon="pi pi-pencil" title="Edit Exam"
-                class="p-button-success p-button-outlined p-button-sm action-btn m-1" (click)="onEditExam(ex)">
-              </button>
-              <button pButton type="button" icon="pi pi-trash" title="Delete Exam"
-                class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteExam(ex.Id)">
-              </button>
+              <button pButton icon="pi pi-pencil" class="p-button-indigo p-button-outlined p-button-sm action-btn m-1"
+                (click)="onEditExam(ex)"></button>
+              <button pButton icon="pi pi-trash" class="p-button-danger p-button-outlined p-button-sm action-btn m-1"
+                (click)="onDeleteExam(ex.Id)"></button>
             </td>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="6" class="empty-state">
-              <div class="empty-box">
-                <i class="pi pi-folder-open"></i>
-                <p>No exam schedules found</p>
-              </div>
-            </td>
-          </tr>
+          <tr><td colspan="6" class="empty-state"><div class="empty-box"><i class="pi pi-folder-open"></i><p>No exams found</p></div></td></tr>
         </ng-template>
-
       </p-table>
     </div>
 
-    <!-- Tab 2: Exam Results list -->
+    <!-- ═══════════════════ TAB 3: RESULTS LEDGER ═══════════════════ -->
     <div *ngIf="activeTab === 'results'">
-      <p-table #dtResults [value]="results" dataKey="Id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
-        [loading]="isLoadingResults" [globalFilterFields]="['Exam.Title', 'Student.Name', 'Subject.Name', 'Grade']"
+      <p-table #dtResults [value]="results" dataKey="Id" [rows]="15" [rowsPerPageOptions]="[10,25,50]"
+        [paginator]="true" [loading]="isLoadingResults"
+        [globalFilterFields]="['Student.Name','Subject.Name','Exam.Title','Grade']"
         styleClass="p-datatable-striped custom-user-table">
 
         <ng-template pTemplate="caption">
@@ -117,78 +213,60 @@
             <div class="search-input-box">
               <span class="p-input-icon-left w-full">
                 <i class="pi pi-search"></i>
-                <input pInputText type="text" (input)="dtResults.filterGlobal($any($event.target).value, 'contains')"
-                  placeholder="Search by student name, subject, exam title, grade..." class="w-full" />
+                <input pInputText type="text"
+                  (input)="dtResults.filterGlobal($any($event.target).value,'contains')"
+                  placeholder="Search student, subject, exam…" class="w-full" />
               </span>
             </div>
+            <button pButton type="button" label="Enter Marks" icon="pi pi-plus"
+              class="p-button-indigo p-button-sm font-semibold"
+              style="border-radius:8px;" (click)="onAddResult()">
+            </button>
           </div>
         </ng-template>
 
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="Exam.Title">Exam <p-sortIcon field="Exam.Title"></p-sortIcon></th>
             <th pSortableColumn="Student.Name">Student <p-sortIcon field="Student.Name"></p-sortIcon></th>
+            <th pSortableColumn="Exam.Title">Exam <p-sortIcon field="Exam.Title"></p-sortIcon></th>
             <th pSortableColumn="Subject.Name">Subject <p-sortIcon field="Subject.Name"></p-sortIcon></th>
-            <th pSortableColumn="MarksObtained">Score <p-sortIcon field="MarksObtained"></p-sortIcon></th>
+            <th pSortableColumn="MarksObtained" class="text-right">Marks <p-sortIcon field="MarksObtained"></p-sortIcon></th>
             <th pSortableColumn="Grade">Grade <p-sortIcon field="Grade"></p-sortIcon></th>
-            <th pSortableColumn="Remarks">Remarks <p-sortIcon field="Remarks"></p-sortIcon></th>
-            <th class="text-right">Action</th>
+            <th class="text-right">Actions</th>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="body" let-res>
           <tr>
             <td>
-              <span class="user-name-text">{{ res?.Exam?.Title }}</span>
-            </td>
-            <td>
               <div class="user-name-cell">
-                <div class="user-avatar">
-                  {{ (res?.Student?.Name || 'S')[0] | uppercase }}
-                </div>
-                <div class="user-details-col">
-                  <span class="user-name-text">{{ res?.Student?.Name }}</span>
-                  <span class="text-muted-sub" *ngIf="res?.Student?.Email">{{ res?.Student?.Email }}</span>
-                </div>
+                <div class="user-avatar">{{ (res?.Student?.Name || 'S')[0] | uppercase }}</div>
+                <span class="user-name-text ml-2">{{ res?.Student?.Name }}</span>
               </div>
             </td>
-            <td>
-              <span class="text-sub">{{ res?.Subject?.Name }} ({{ res?.Subject?.Code }})</span>
+            <td><span class="text-sub font-semibold">{{ res?.Exam?.Title }}</span></td>
+            <td><span class="text-sub">{{ res?.Subject?.Name }}</span></td>
+            <td class="text-right">
+              <span class="font-semibold" style="color:#1e293b;">{{ res?.MarksObtained }}</span>
+              <span style="color:#94a3b8;font-size:0.8rem;">/{{ res?.TotalMarks }}</span>
             </td>
             <td>
-              <span class="text-sub font-semibold">{{ res?.MarksObtained }} / {{ res?.TotalMarks }}</span>
-            </td>
-            <td>
-              <p-tag [value]="res?.Grade || 'N/A'" [severity]="getGradeSeverity(res?.Grade)"></p-tag>
-            </td>
-            <td>
-              <span class="text-sub">{{ res?.Remarks || 'N/A' }}</span>
+              <p-tag [value]="res?.Grade || '—'" [severity]="getGradeSeverity(res?.Grade)"></p-tag>
             </td>
             <td class="text-right">
-              <button pButton type="button" icon="pi pi-pencil" title="Edit Marks"
-                class="p-button-success p-button-outlined p-button-sm action-btn m-1" (click)="onEditResult(res)">
-              </button>
-              <button pButton type="button" icon="pi pi-trash" title="Delete Entry"
-                class="p-button-danger p-button-outlined p-button-sm action-btn m-1" (click)="onDeleteResult(res.Id)">
-              </button>
+              <button pButton icon="pi pi-pencil" class="p-button-indigo p-button-outlined p-button-sm action-btn m-1"
+                (click)="onEditResult(res)"></button>
+              <button pButton icon="pi pi-trash" class="p-button-danger p-button-outlined p-button-sm action-btn m-1"
+                (click)="onDeleteResult(res.Id)"></button>
             </td>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="7" class="empty-state">
-              <div class="empty-box">
-                <i class="pi pi-folder-open"></i>
-                <p>No student marks recorded yet</p>
-              </div>
-            </td>
-          </tr>
+          <tr><td colspan="6" class="empty-state"><div class="empty-box"><i class="pi pi-folder-open"></i><p>No results found</p></div></td></tr>
         </ng-template>
-
       </p-table>
     </div>
 
   </div>
-
 </div>
